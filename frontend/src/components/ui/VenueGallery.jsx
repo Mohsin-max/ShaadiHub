@@ -38,8 +38,8 @@ function VenueGallery({ images }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-10 h-[300px] md:h-[440px] overflow-hidden">
-        <div className="md:col-span-3 h-full rounded-xl overflow-hidden relative group">
+      <div className="flex gap-gutter mb-10 h-[300px] md:h-[440px] overflow-hidden">
+        <div className="flex-1 md:flex-[3] min-w-0 h-full rounded-xl overflow-hidden relative group">
           <img
             className="w-full h-full object-cover"
             src={images[activeIndex]}
@@ -49,7 +49,7 @@ function VenueGallery({ images }) {
           <ArrowButton direction="right" onClick={() => goTo(1)} />
         </div>
 
-        <div className="hidden md:grid grid-rows-3 gap-gutter h-full">
+        <div className="hidden md:flex flex-1 flex-col gap-gutter h-full min-w-0">
           {thumbnails.map((i, idx) => (
             <button
               key={i}
@@ -57,7 +57,7 @@ function VenueGallery({ images }) {
                 setActiveIndex(i)
                 setLightboxOpen(true)
               }}
-              className="rounded-xl overflow-hidden relative group h-full"
+              className="flex-1 min-h-0 rounded-xl overflow-hidden relative group"
             >
               <img
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
