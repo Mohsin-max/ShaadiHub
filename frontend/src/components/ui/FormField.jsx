@@ -11,7 +11,7 @@ function FormField({ label, prefix, className = '', inputClassName = '', ...inpu
           </span>
         )}
         <input
-          className={`w-full ${prefix ? 'pl-10' : 'px-3.5'} pr-3.5 py-2.5 text-[14px] bg-white border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-outline-variant ${inputClassName}`}
+          className={`w-full ${prefix ? 'pl-10' : 'px-3.5'} pr-3.5 py-2.5 text-[14px] bg-white border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-outline-variant [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${inputClassName}`}
           {...inputProps}
         />
       </div>

@@ -56,6 +56,16 @@ function AddVenuePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
+  const sectionsComplete = [
+    Boolean(form.name && form.type && form.capacity),
+    Boolean(form.googleMapsLink && form.areaName && form.city),
+    Boolean(form.price),
+    amenities.length > 0,
+    photos.length > 0,
+  ]
+  const firstIncomplete = sectionsComplete.findIndex((done) => !done)
+  const currentStep = firstIncomplete === -1 ? sectionsComplete.length : firstIncomplete
+
   const updateField = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
   const handleMapsLinkBlur = () => {
@@ -140,9 +150,9 @@ function AddVenuePage() {
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto">
-          <form className="max-w-[1280px] mx-auto px-5 md:px-6 py-6 flex gap-5" onSubmit={handleSubmit}>
+          <form className="max-w-4xl mx-auto px-5 md:px-6 py-6 flex gap-5" onSubmit={handleSubmit}>
             {/* Left Column: Form */}
-            <div className="flex-1 space-y-5">
+            <div className="flex-1 min-w-0 space-y-5">
               <ErrorBanner message={error} />
 
               <FormSection icon="info" title="Section 1: Venue Details">
@@ -299,7 +309,7 @@ function AddVenuePage() {
             </div>
 
             {/* Right Column: Progress */}
-            <VenueProgressSidebar currentStep={1} />
+            <VenueProgressSidebar currentStep={currentStep} />
           </form>
 
           <PageFooter links={FOOTER_LINKS} />
