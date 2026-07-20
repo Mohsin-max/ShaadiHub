@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Icon from '../ui/Icon'
+import { useAuth } from '../../context/AuthContext'
 
 const NAV_ITEMS = [
   { icon: 'dashboard', label: 'Dashboard', to: '/provider/dashboard' },
@@ -13,7 +14,15 @@ const NAV_ITEMS = [
 const PROFILE_IMAGE =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuAN7Oa5EjnIP4Bq91N9yq18t9hKJqAk6ycgf5lgXTlsNxoA-u3JXaSiU_OIWlrgSfA9vBGNLNMR_XKkOpHM856Xf95SPkeUkhVP2jQLu16_obAE2LesXWMay8wuxquO_hz86iqI3DdhneXjcAiNRr7gU9RseftTMC0Zdt7q6d349c1umA7qfmHLQfJMH803mhko4DL2tURjcsXyqhyigYKp0ae9xHpXGAj86HuOdrdrabC-_bOULnttNsQ4PxjIQ3IsjbtCUqoo6KQ'
 
-function ProviderSidebar({ venueName = 'Royal Palms Marquee', activeLabel = 'Dashboard' }) {
+function ProviderSidebar({ activeLabel = 'Dashboard' }) {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
   return (
     <aside className="hidden md:flex flex-col h-screen w-52 bg-primary text-on-primary shadow-lg fixed left-0 top-0 z-50">
       <div className="px-4 py-4">
@@ -28,7 +37,9 @@ function ProviderSidebar({ venueName = 'Royal Palms Marquee', activeLabel = 'Das
           <img className="w-full h-full object-cover" src={PROFILE_IMAGE} alt="" />
         </div>
         <div className="flex flex-col overflow-hidden">
-          <span className="font-title-lg text-[12px] leading-tight truncate">{venueName}</span>
+          <span className="font-title-lg text-[12px] leading-tight truncate">
+            {user?.displayName || 'Provider'}
+          </span>
           <span className="font-label-caps text-[9px] text-on-primary/60 uppercase tracking-widest">
             Provider Account
           </span>
@@ -71,13 +82,13 @@ function ProviderSidebar({ venueName = 'Royal Palms Marquee', activeLabel = 'Das
             <Icon name="help" className="text-[16px]" />
             <span className="text-[11px] font-semibold">Help Center</span>
           </a>
-          <a
-            href="#"
-            className="flex items-center gap-2.5 text-on-primary/60 px-2 py-1.5 hover:text-on-primary transition-colors"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2.5 text-on-primary/60 px-2 py-1.5 hover:text-on-primary transition-colors"
           >
             <Icon name="logout" className="text-[16px]" />
             <span className="text-[11px] font-semibold">Logout</span>
-          </a>
+          </button>
         </div>
       </div>
     </aside>

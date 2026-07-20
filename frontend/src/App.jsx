@@ -6,6 +6,7 @@ import AddVenuePage from './pages/AddVenuePage'
 import BrowseVenuesPage from './pages/BrowseVenuesPage'
 import FavoritesPage from './pages/FavoritesPage'
 import VenueDetailPage from './pages/VenueDetailPage'
+import ProtectedRoute from './components/auth/ProtectedRoute'
 
 function App() {
   return (
@@ -13,8 +14,22 @@ function App() {
       <Route path="/" element={<Navigate to="/signup" replace />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/provider/dashboard" element={<ProviderDashboardPage />} />
-      <Route path="/provider/venues/new" element={<AddVenuePage />} />
+      <Route
+        path="/provider/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={['VenueOwner']}>
+            <ProviderDashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/provider/venues/new"
+        element={
+          <ProtectedRoute allowedRoles={['VenueOwner']}>
+            <AddVenuePage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/venues" element={<BrowseVenuesPage />} />
       <Route path="/venues/:id" element={<VenueDetailPage />} />
       <Route path="/favorites" element={<FavoritesPage />} />

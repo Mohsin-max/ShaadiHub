@@ -1,5 +1,6 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import Icon from '../ui/Icon'
+import { useAuth } from '../../context/AuthContext'
 
 const NAV_ITEMS = [
   { label: 'Browse Venues', to: '/venues' },
@@ -10,6 +11,14 @@ const AVATAR_IMAGE =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuAd3lpSQDoU_3gmMFUvFJ97LcWxuhZnI4HBFFyZDIcHnCcKq51qp88JYvZTWxpg31NUOnF3GSfyUbK48JYZJSSVv58V2SU6nDGcVt06d_iHzsGXI-a35c1Fk6eepVfVikrtpvmYBOf05cMO2gpRnceM9SMksjX7ljxBDyOhGf5t3dhtuLmWPYiyVB9ll6bjSa9A8w_YmTywwKVsz7ooM3zCQVTjkvFKF52DmpBWjzpxZ2f8YGUrmWWah9tbu3jVWHMkhSu1Q4-q4g'
 
 function ClientHeader() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
   return (
     <header className="fixed top-0 w-full z-50 flex justify-between items-center px-5 md:px-6 h-14 bg-background/95 backdrop-blur-md border-b border-outline-variant shadow-sm">
       <div className="flex items-center gap-8">
@@ -53,9 +62,30 @@ function ClientHeader() {
         <button className="p-1.5 text-on-surface-variant hover:text-primary transition-colors">
           <Icon name="notifications" className="text-[20px]" />
         </button>
-        <div className="h-7 w-7 rounded-full bg-secondary-fixed flex items-center justify-center overflow-hidden border border-outline-variant cursor-pointer hover:border-primary transition-colors">
-          <img className="w-full h-full object-cover" src={AVATAR_IMAGE} alt="" />
-        </div>
+
+        {user ? (
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-full bg-secondary-fixed flex items-center justify-center overflow-hidden border border-outline-variant">
+              <img className="w-full h-full object-cover" src={AVATAR_IMAGE} alt="" />
+            </div>
+            <span className="hidden md:block text-[13px] font-semibold text-primary">
+              {user.displayName}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="text-[12px] font-semibold text-on-surface-variant hover:text-error transition-colors ml-1"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <Link
+            to="/login"
+            className="text-[13px] font-semibold text-primary hover:text-secondary transition-colors"
+          >
+            Sign In
+          </Link>
+        )}
       </div>
     </header>
   )

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import ProviderSidebar from '../components/layout/ProviderSidebar'
 import DashboardHeader from '../components/layout/DashboardHeader'
 import MobileBottomNav from '../components/layout/MobileBottomNav'
@@ -6,6 +7,8 @@ import EmptyStateCard from '../components/ui/EmptyStateCard'
 import Icon from '../components/ui/Icon'
 
 function ProviderDashboardPage() {
+  const navigate = useNavigate()
+
   return (
     <div className="flex min-h-screen bg-background text-on-surface font-body-md">
       <ProviderSidebar />
@@ -46,6 +49,7 @@ function ProviderDashboardPage() {
               description="Start reaching thousands of couples planning their perfect wedding. List your halls, marquees, or outdoor spaces and manage inquiries effortlessly."
               actionLabel="Get Started Now"
               actionIcon="rocket_launch"
+              onAction={() => navigate('/provider/venues/new')}
             />
           </section>
         </div>
