@@ -3,7 +3,7 @@ import Button from './Button'
 
 function ProviderCard({ name, role, photo, onSendRequest }) {
   return (
-    <div className="bg-white p-5 rounded-xl border border-outline-variant shadow-[0px_4px_12px_rgba(75,44,94,0.08)] sticky top-20">
+    <div className="bg-white p-5 rounded-xl border border-outline-variant shadow-[0px_4px_12px_rgba(75,44,94,0.08)]">
       <h4 className="font-headline-sm text-[18px] text-primary mb-5">Venue Provider</h4>
 
       <div className="flex items-center gap-3 mb-5">

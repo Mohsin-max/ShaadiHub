@@ -76,7 +76,7 @@ function VenueDetailPage() {
 
           <VenueGallery images={GALLERY_IMAGES} />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-margin-desktop">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-margin-desktop items-start">
             {/* Left Content */}
             <div className="lg:col-span-2 space-y-8">
               <section>
