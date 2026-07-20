@@ -14,21 +14,21 @@ const PROFILE_IMAGE =
 
 function ProviderSidebar({ venueName = 'Royal Palms Marquee' }) {
   return (
-    <aside className="hidden md:flex flex-col h-screen w-56 bg-primary text-on-primary shadow-lg fixed left-0 top-0 z-50">
-      <div className="px-5 py-6">
-        <span className="font-display-lg text-headline-sm text-secondary-fixed font-bold">
+    <aside className="hidden md:flex flex-col h-screen w-52 bg-primary text-on-primary shadow-lg fixed left-0 top-0 z-50">
+      <div className="px-4 py-4">
+        <span className="font-display-lg text-[17px] text-secondary-fixed font-bold">
           ShaadiHub
         </span>
       </div>
 
       {/* Profile */}
-      <div className="px-5 mb-6 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border border-outline-variant/20 shrink-0">
+      <div className="px-4 mb-4 flex items-center gap-2.5">
+        <div className="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border border-outline-variant/20 shrink-0">
           <img className="w-full h-full object-cover" src={PROFILE_IMAGE} alt="" />
         </div>
         <div className="flex flex-col overflow-hidden">
-          <span className="font-title-lg text-[13px] leading-tight truncate">{venueName}</span>
-          <span className="font-label-caps text-[10px] text-on-primary/60 uppercase tracking-widest">
+          <span className="font-title-lg text-[12px] leading-tight truncate">{venueName}</span>
+          <span className="font-label-caps text-[9px] text-on-primary/60 uppercase tracking-widest">
             Provider Account
           </span>
         </div>
@@ -39,37 +39,37 @@ function ProviderSidebar({ venueName = 'Royal Palms Marquee' }) {
           <a
             key={item.label}
             href="#"
-            className={`flex items-center gap-3 mx-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+            className={`flex items-center gap-2.5 mx-2 px-3 py-2 rounded-lg transition-all duration-200 ${
               item.active
                 ? 'bg-secondary-container text-on-secondary-container font-bold'
                 : 'text-on-primary/80 hover:bg-primary-container'
             }`}
           >
-            <Icon name={item.icon} className="text-[20px]" />
-            <span className="font-label-caps text-label-caps uppercase">{item.label}</span>
+            <Icon name={item.icon} className="text-[18px]" />
+            <span className="font-label-caps text-[10px] uppercase">{item.label}</span>
           </a>
         ))}
       </nav>
 
-      <div className="px-4 py-5 space-y-3">
-        <button className="w-full py-2.5 px-4 bg-secondary text-on-secondary rounded-lg font-bold text-sm uppercase tracking-wide hover:brightness-110 transition-all flex items-center justify-center gap-2">
-          <Icon name="add" className="text-[18px]" />
+      <div className="px-3 py-4 space-y-2">
+        <button className="w-full py-2 px-3 bg-secondary text-on-secondary rounded-lg font-bold text-xs uppercase tracking-wide hover:brightness-110 transition-all flex items-center justify-center gap-1.5">
+          <Icon name="add" className="text-[16px]" />
           Add New Venue
         </button>
-        <div className="pt-3 border-t border-on-primary/10">
+        <div className="pt-2 border-t border-on-primary/10">
           <a
             href="#"
-            className="flex items-center gap-3 text-on-primary/60 px-2 py-2 hover:text-on-primary transition-colors"
+            className="flex items-center gap-2.5 text-on-primary/60 px-2 py-1.5 hover:text-on-primary transition-colors"
           >
-            <Icon name="help" className="text-[18px]" />
-            <span className="text-xs font-semibold">Help Center</span>
+            <Icon name="help" className="text-[16px]" />
+            <span className="text-[11px] font-semibold">Help Center</span>
           </a>
           <a
             href="#"
-            className="flex items-center gap-3 text-on-primary/60 px-2 py-2 hover:text-on-primary transition-colors"
+            className="flex items-center gap-2.5 text-on-primary/60 px-2 py-1.5 hover:text-on-primary transition-colors"
           >
-            <Icon name="logout" className="text-[18px]" />
-            <span className="text-xs font-semibold">Logout</span>
+            <Icon name="logout" className="text-[16px]" />
+            <span className="text-[11px] font-semibold">Logout</span>
           </a>
         </div>
       </div>

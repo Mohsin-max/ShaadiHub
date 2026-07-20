@@ -22,14 +22,14 @@ function LoginPage() {
         headline="Welcome Back to Your Journey."
         bodyText="Your dream venues, negotiations, and bookings are right where you left them. Sign in to pick up exactly where you left off."
       >
-        <div className="mb-8">
-          <h1 className="font-display-lg text-headline-md text-primary mb-2">Sign In</h1>
-          <p className="text-on-surface-variant text-body-md">
+        <div className="mb-5">
+          <h1 className="font-display-lg text-[22px] leading-tight text-primary mb-1">Sign In</h1>
+          <p className="text-on-surface-variant text-body-sm">
             Welcome back — enter your details to continue.
           </p>
         </div>
 
-        <form className="space-y-4">
+        <form className="space-y-3">
           <FormField label="Email Address" type="email" placeholder="zia.khan@example.com" />
 
           <div className="space-y-1">
@@ -44,7 +44,7 @@ function LoginPage() {
             </div>
           </div>
 
-          <Button type="submit" variant="primary" className="mt-6">
+          <Button type="submit" variant="primary" className="mt-3">
             Sign In
           </Button>
 
@@ -53,14 +53,14 @@ function LoginPage() {
           <GoogleButton />
         </form>
 
-        <p className="mt-8 text-center text-body-sm text-on-surface-variant">
+        <p className="mt-5 text-center text-body-sm text-on-surface-variant">
           Don't have an account?{' '}
           <Link to="/signup" className="text-primary font-bold hover:text-secondary transition-colors">
             Sign Up
           </Link>
         </p>
 
-        <p className="mt-4 text-center text-body-sm text-on-surface-variant">
+        <p className="mt-3 text-center text-body-sm text-on-surface-variant">
           Protected by ShaadiHub Secure Protocol.{' '}
           <Icon name="lock" className="align-middle text-[14px]" />
         </p>

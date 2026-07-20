@@ -24,17 +24,17 @@ function SignupPage() {
         headline="Crafting Moments of Forever."
         bodyText="Join Pakistan's premier wedding ecosystem where traditions meet technical precision. Whether you're planning your dream day or hosting it, we bridge the gap with excellence."
       >
-        <div className="mb-8">
-          <h1 className="font-display-lg text-headline-md text-primary mb-2">
+        <div className="mb-5">
+          <h1 className="font-display-lg text-[22px] leading-tight text-primary mb-1">
             Create Your Account
           </h1>
-          <p className="text-on-surface-variant text-body-md">
+          <p className="text-on-surface-variant text-body-sm">
             Choose your path to begin your journey with us.
           </p>
         </div>
 
         {/* Toggle */}
-        <div className="relative bg-surface-container-low p-1 rounded-lg flex mb-8 border border-outline-variant/30">
+        <div className="relative bg-surface-container-low p-1 rounded-lg flex mb-5 border border-outline-variant/30">
           <div
             className={`absolute h-[calc(100%-8px)] w-[calc(50%-4px)] top-1 left-1 bg-antique-gold rounded-md transition-transform duration-300 ease-in-out ${
               activeForm === 'provider' ? 'translate-x-full' : 'translate-x-0'
@@ -43,7 +43,7 @@ function SignupPage() {
           <button
             type="button"
             onClick={() => setActiveForm('client')}
-            className={`relative z-10 flex-1 py-3 font-title-lg text-body-md transition-colors duration-300 ${
+            className={`relative z-10 flex-1 py-2 font-title-lg text-body-sm transition-colors duration-300 ${
               activeForm === 'client' ? 'text-primary font-bold' : 'text-on-surface-variant'
             }`}
           >
@@ -52,7 +52,7 @@ function SignupPage() {
           <button
             type="button"
             onClick={() => setActiveForm('provider')}
-            className={`relative z-10 flex-1 py-3 font-title-lg text-body-md transition-colors duration-300 ${
+            className={`relative z-10 flex-1 py-2 font-title-lg text-body-sm transition-colors duration-300 ${
               activeForm === 'provider' ? 'text-primary font-bold' : 'text-on-surface-variant'
             }`}
           >
@@ -61,15 +61,15 @@ function SignupPage() {
         </div>
 
         {activeForm === 'client' ? (
-          <form className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <form className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
               <FormField label="First Name" type="text" placeholder="Zia" />
               <FormField label="Last Name" type="text" placeholder="Khan" />
             </div>
             <FormField label="Email Address" type="email" placeholder="zia.khan@example.com" />
             <FormField label="Password" type="password" placeholder="••••••••" />
 
-            <Button type="submit" variant="primary" className="mt-6">
+            <Button type="submit" variant="primary" className="mt-3">
               Create Client Account
             </Button>
 
@@ -78,19 +78,19 @@ function SignupPage() {
             <GoogleButton />
           </form>
         ) : (
-          <form className="space-y-4">
+          <form className="space-y-3">
             <FormField label="Full Name" type="text" placeholder="Ahmed Khan" />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <FormField label="Email" type="email" placeholder="ahmed@royalpalms.pk" />
               <FormField label="Phone Number" type="tel" placeholder="+92 300 1234567" />
             </div>
             <FormField label="Create Password" type="password" placeholder="••••••••" />
 
-            <Button type="submit" variant="gold" className="mt-6">
+            <Button type="submit" variant="gold" className="mt-3">
               Register as Provider
             </Button>
 
-            <p className="text-center text-body-sm text-on-surface-variant px-4 pt-4">
+            <p className="text-center text-body-sm text-on-surface-variant px-4 pt-2">
               By signing up, you agree to our{' '}
               <a className="underline font-semibold" href="#">
                 Venue Terms of Service
@@ -100,7 +100,7 @@ function SignupPage() {
           </form>
         )}
 
-        <p className="mt-8 text-center text-body-sm text-on-surface-variant">
+        <p className="mt-5 text-center text-body-sm text-on-surface-variant">
           Protected by ShaadiHub Secure Protocol.{' '}
           <Icon name="lock" className="align-middle text-[14px]" />
         </p>
