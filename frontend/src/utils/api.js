@@ -54,3 +54,7 @@ export function listVenues({ city = [], area = [], type = [] } = {}) {
 export function getVenue(id) {
   return request(`/venues/${id}`)
 }
+
+export function listMyVenues(token) {
+  return request('/venues/mine', { headers: authHeaders(token) })
+}

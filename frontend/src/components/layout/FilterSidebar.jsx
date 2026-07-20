@@ -1,3 +1,5 @@
+import SearchableMultiSelect from '../ui/SearchableMultiSelect'
+
 function FilterSidebar({
   cities = [],
   areas = [],
@@ -36,21 +38,12 @@ function FilterSidebar({
           {cities.length === 0 ? (
             <p className="text-[12px] text-on-surface-variant italic">No venues yet</p>
           ) : (
-            <div className="space-y-2.5">
-              {cities.map((city) => (
-                <label key={city} className="flex items-center gap-2.5 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={selectedCities.includes(city)}
-                    onChange={() => onCityToggle?.(city)}
-                    className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary"
-                  />
-                  <span className="text-[13px] text-on-surface-variant group-hover:text-primary transition-colors">
-                    {city}
-                  </span>
-                </label>
-              ))}
-            </div>
+            <SearchableMultiSelect
+              options={cities}
+              selected={selectedCities}
+              onToggle={onCityToggle}
+              placeholder="Search city…"
+            />
           )}
         </div>
 
@@ -60,16 +53,16 @@ function FilterSidebar({
             <h3 className="font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
               Neighborhood
             </h3>
-            <div className="space-y-2.5">
+            <div className="grid grid-cols-2 gap-x-2 gap-y-2.5">
               {areas.map((area) => (
-                <label key={area} className="flex items-center gap-2.5 cursor-pointer group">
+                <label key={area} className="flex items-center gap-2 cursor-pointer group min-w-0">
                   <input
                     type="checkbox"
                     checked={selectedAreas.includes(area)}
                     onChange={() => onAreaToggle?.(area)}
-                    className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary"
+                    className="w-4 h-4 shrink-0 rounded border-outline-variant text-primary focus:ring-primary"
                   />
-                  <span className="text-[13px] text-on-surface-variant group-hover:text-primary transition-colors">
+                  <span className="text-[13px] text-on-surface-variant group-hover:text-primary transition-colors truncate">
                     {area}
                   </span>
                 </label>

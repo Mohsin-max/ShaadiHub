@@ -5,7 +5,7 @@ function formatPrice(value) {
   return `Rs. ${Number(value).toLocaleString('en-PK')}`
 }
 
-function VenueCard({ venue }) {
+function VenueCard({ venue, showFavorite = true }) {
   const { id, images, type, name, areaName, city, capacity, price } = venue
   const image = images?.[0]?.url
 
@@ -26,9 +26,11 @@ function VenueCard({ venue }) {
         <div className="absolute top-3 left-3 bg-primary text-on-primary text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
           {type}
         </div>
-        <button className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/80 backdrop-blur shadow-sm flex items-center justify-center text-on-surface-variant hover:text-error transition-all">
-          <Icon name="favorite" className="text-[18px]" />
-        </button>
+        {showFavorite && (
+          <button className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/80 backdrop-blur shadow-sm flex items-center justify-center text-on-surface-variant hover:text-error transition-all">
+            <Icon name="favorite" className="text-[18px]" />
+          </button>
+        )}
       </div>
       <div className="p-4">
         <h3 className="font-headline-sm text-[16px] text-on-surface mb-1.5">{name}</h3>

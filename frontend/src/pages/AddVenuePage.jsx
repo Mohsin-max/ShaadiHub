@@ -120,7 +120,7 @@ function AddVenuePage() {
 
   return (
     <div className="flex h-screen w-full bg-background text-on-surface font-body-md overflow-hidden">
-      <ProviderSidebar activeLabel="My Venues" />
+      <ProviderSidebar activeLabel="Dashboard" />
 
       <main className="flex-1 md:ml-52 flex flex-col overflow-hidden">
         {/* Header */}

@@ -95,6 +95,22 @@ public class VenuesController : ControllerBase
         return Ok(venues.Select(BuildResponse));
     }
 
+    [HttpGet("mine")]
+    [Authorize(Roles = "VenueOwner")]
+    public async Task<IActionResult> ListMine()
+    {
+        var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var venues = await _context.Venues
+            .Include(v => v.Owner)
+            .Include(v => v.Images)
+            .Where(v => v.OwnerId == ownerId)
+            .OrderByDescending(v => v.CreatedAt)
+            .ToListAsync();
+
+        return Ok(venues.Select(BuildResponse));
+    }
+
     [HttpGet("{id:int}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetById(int id)

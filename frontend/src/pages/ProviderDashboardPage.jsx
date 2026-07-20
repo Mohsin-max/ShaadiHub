@@ -1,13 +1,27 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProviderSidebar from '../components/layout/ProviderSidebar'
 import DashboardHeader from '../components/layout/DashboardHeader'
 import MobileBottomNav from '../components/layout/MobileBottomNav'
 import StatCard from '../components/ui/StatCard'
 import EmptyStateCard from '../components/ui/EmptyStateCard'
+import VenueCard from '../components/ui/VenueCard'
 import Icon from '../components/ui/Icon'
+import { useAuth } from '../context/AuthContext'
+import { listMyVenues } from '../utils/api'
 
 function ProviderDashboardPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const [venues, setVenues] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    listMyVenues(user?.token)
+      .then(setVenues)
+      .catch(() => setVenues([]))
+      .finally(() => setLoading(false))
+  }, [user?.token])
 
   return (
     <div className="flex min-h-screen bg-background text-on-surface font-body-md">
@@ -41,17 +55,32 @@ function ProviderDashboardPage() {
             </div>
           </section>
 
-          {/* Empty State */}
-          <section>
-            <EmptyStateCard
-              icon="add_business"
-              title="Add Your First Venue"
-              description="Start reaching thousands of couples planning their perfect wedding. List your halls, marquees, or outdoor spaces and manage inquiries effortlessly."
-              actionLabel="Get Started Now"
-              actionIcon="rocket_launch"
-              onAction={() => navigate('/provider/venues/new')}
-            />
-          </section>
+          {!loading && venues.length === 0 && (
+            <section>
+              <EmptyStateCard
+                icon="add_business"
+                title="Add Your First Venue"
+                description="Start reaching thousands of couples planning their perfect wedding. List your halls, marquees, or outdoor spaces and manage inquiries effortlessly."
+                actionLabel="Get Started Now"
+                actionIcon="rocket_launch"
+                onAction={() => navigate('/provider/venues/new')}
+              />
+            </section>
+          )}
+
+          {venues.length > 0 && (
+            <section>
+              <h2 className="font-title-lg text-[15px] text-primary mb-3 flex items-center gap-1.5">
+                <Icon name="storefront" className="text-secondary text-[18px]" />
+                My Venues
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {venues.map((venue) => (
+                  <VenueCard key={venue.id} venue={venue} showFavorite={false} />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </main>
 

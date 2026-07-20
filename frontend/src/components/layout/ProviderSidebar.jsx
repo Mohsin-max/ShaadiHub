@@ -6,7 +6,6 @@ const NAV_ITEMS = [
   { icon: 'dashboard', label: 'Dashboard', to: '/provider/dashboard' },
   { icon: 'mail', label: 'Inquiries', to: '#' },
   { icon: 'event_available', label: 'Bookings', to: '#' },
-  { icon: 'storefront', label: 'My Venues', to: '#' },
   { icon: 'payments', label: 'Earnings', to: '#' },
   { icon: 'settings', label: 'Settings', to: '#' },
 ]
