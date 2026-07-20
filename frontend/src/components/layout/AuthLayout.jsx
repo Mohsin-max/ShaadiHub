@@ -6,8 +6,8 @@ function AuthLayout({ imageUrl, imageAlt, headline, bodyText, children }) {
         <div className="absolute bottom-0 left-0 w-1/2 h-full bg-[radial-gradient(circle_at_bottom_left,_#4A154B_0%,_transparent_70%)]" />
       </div>
 
-      <div className="w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant overflow-hidden">
-        <div className="hidden lg:block relative min-h-[520px]">
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant overflow-hidden">
+        <div className="hidden lg:block relative min-h-[560px]">
           <div
             className="absolute inset-0 bg-cover bg-center"
             role="img"
@@ -21,7 +21,7 @@ function AuthLayout({ imageUrl, imageAlt, headline, bodyText, children }) {
           </div>
         </div>
 
-        <div className="p-6 md:p-8 flex flex-col justify-center">{children}</div>
+        <div className="p-8 md:p-12 flex flex-col justify-center">{children}</div>
       </div>
     </main>
   )

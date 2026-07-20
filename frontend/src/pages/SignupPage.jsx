@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import PublicHeader from '../components/layout/PublicHeader'
 import PublicFooter from '../components/layout/PublicFooter'
 import AuthLayout from '../components/layout/AuthLayout'
@@ -7,12 +8,69 @@ import Button from '../components/ui/Button'
 import GoogleButton from '../components/ui/GoogleButton'
 import Divider from '../components/ui/Divider'
 import Icon from '../components/ui/Icon'
+import ErrorBanner from '../components/ui/ErrorBanner'
+import { useAuth } from '../context/AuthContext'
 
 const HERO_IMAGE =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuAwvZpBFL9aDvrLFc-VZZPbPGrm2ZDLpS-0vf4zUj2g3IgqTBPSPZ1uBZLfLdAyEjBBqfncOHrjLmlfr43kddRxZDPcBsrB6NQsNmh0Itoyjdg5oXZjfWeT3AWp1S3lSBopIqbTqluHBztnq30JWEGh57u5DolAeMyD3X7rf1GIIbzfC47HwCPEETL59Fea7k4Z7J-4E5GroXCiloFAUfqJpZT9YhRUqEKCeISXpcZbvTqix2Y7kPOy2YCI5Lh5MAotGvO1VH_nbwY'
 
+const ROLE_REDIRECT = {
+  Client: '/venues',
+  VenueOwner: '/provider/dashboard',
+}
+
 function SignupPage() {
   const [activeForm, setActiveForm] = useState('client')
+  const [clientForm, setClientForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+  })
+  const [providerForm, setProviderForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const { signupClient, signupProvider } = useAuth()
+  const navigate = useNavigate()
+
+  const updateClientField = (field) => (e) =>
+    setClientForm((prev) => ({ ...prev, [field]: e.target.value }))
+  const updateProviderField = (field) => (e) =>
+    setProviderForm((prev) => ({ ...prev, [field]: e.target.value }))
+
+  const handleClientSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const result = await signupClient(clientForm)
+      navigate(ROLE_REDIRECT[result.role] || '/venues')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleProviderSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const result = await signupProvider(providerForm)
+      navigate(ROLE_REDIRECT[result.role] || '/provider/dashboard')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col w-full">
@@ -42,7 +100,10 @@ function SignupPage() {
           />
           <button
             type="button"
-            onClick={() => setActiveForm('client')}
+            onClick={() => {
+              setActiveForm('client')
+              setError('')
+            }}
             className={`relative z-10 flex-1 py-2 font-title-lg text-body-sm transition-colors duration-300 ${
               activeForm === 'client' ? 'text-primary font-bold' : 'text-on-surface-variant'
             }`}
@@ -51,7 +112,10 @@ function SignupPage() {
           </button>
           <button
             type="button"
-            onClick={() => setActiveForm('provider')}
+            onClick={() => {
+              setActiveForm('provider')
+              setError('')
+            }}
             className={`relative z-10 flex-1 py-2 font-title-lg text-body-sm transition-colors duration-300 ${
               activeForm === 'provider' ? 'text-primary font-bold' : 'text-on-surface-variant'
             }`}
@@ -60,34 +124,94 @@ function SignupPage() {
           </button>
         </div>
 
-        {activeForm === 'client' ? (
-          <form className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <FormField label="First Name" type="text" placeholder="Zia" />
-              <FormField label="Last Name" type="text" placeholder="Khan" />
-            </div>
-            <FormField label="Email Address" type="email" placeholder="zia.khan@example.com" />
-            <FormField label="Password" type="password" placeholder="••••••••" />
+        <ErrorBanner message={error} />
 
-            <Button type="submit" variant="primary" className="mt-3">
-              Create Client Account
+        {activeForm === 'client' ? (
+          <form className="space-y-3 mt-3" onSubmit={handleClientSubmit}>
+            <div className="grid grid-cols-2 gap-3">
+              <FormField
+                label="First Name"
+                type="text"
+                placeholder="Zia"
+                required
+                value={clientForm.firstName}
+                onChange={updateClientField('firstName')}
+              />
+              <FormField
+                label="Last Name"
+                type="text"
+                placeholder="Khan"
+                required
+                value={clientForm.lastName}
+                onChange={updateClientField('lastName')}
+              />
+            </div>
+            <FormField
+              label="Email Address"
+              type="email"
+              placeholder="zia.khan@example.com"
+              required
+              value={clientForm.email}
+              onChange={updateClientField('email')}
+            />
+            <FormField
+              label="Password"
+              type="password"
+              placeholder="••••••••"
+              required
+              minLength={6}
+              value={clientForm.password}
+              onChange={updateClientField('password')}
+            />
+
+            <Button type="submit" variant="primary" className="mt-3" disabled={loading}>
+              {loading ? 'Creating Account…' : 'Create Client Account'}
             </Button>
 
             <Divider label="Or continue with" />
 
-            <GoogleButton />
+            <GoogleButton type="button" disabled />
           </form>
         ) : (
-          <form className="space-y-3">
-            <FormField label="Full Name" type="text" placeholder="Ahmed Khan" />
+          <form className="space-y-3 mt-3" onSubmit={handleProviderSubmit}>
+            <FormField
+              label="Full Name"
+              type="text"
+              placeholder="Ahmed Khan"
+              required
+              value={providerForm.name}
+              onChange={updateProviderField('name')}
+            />
             <div className="grid grid-cols-2 gap-3">
-              <FormField label="Email" type="email" placeholder="ahmed@royalpalms.pk" />
-              <FormField label="Phone Number" type="tel" placeholder="+92 300 1234567" />
+              <FormField
+                label="Email"
+                type="email"
+                placeholder="ahmed@royalpalms.pk"
+                required
+                value={providerForm.email}
+                onChange={updateProviderField('email')}
+              />
+              <FormField
+                label="Phone Number"
+                type="tel"
+                placeholder="+92 300 1234567"
+                required
+                value={providerForm.phone}
+                onChange={updateProviderField('phone')}
+              />
             </div>
-            <FormField label="Create Password" type="password" placeholder="••••••••" />
+            <FormField
+              label="Create Password"
+              type="password"
+              placeholder="••••••••"
+              required
+              minLength={6}
+              value={providerForm.password}
+              onChange={updateProviderField('password')}
+            />
 
-            <Button type="submit" variant="gold" className="mt-3">
-              Register as Provider
+            <Button type="submit" variant="gold" className="mt-3" disabled={loading}>
+              {loading ? 'Registering…' : 'Register as Provider'}
             </Button>
 
             <p className="text-center text-body-sm text-on-surface-variant px-4 pt-2">

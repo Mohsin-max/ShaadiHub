@@ -9,7 +9,7 @@ const VARIANTS = {
 function Button({ variant = 'primary', fullWidth = true, className = '', children, ...rest }) {
   return (
     <button
-      className={`${fullWidth ? 'w-full' : ''} flex items-center justify-center gap-2 font-bold text-[14px] py-2.5 rounded-lg transition-all active:scale-[0.98] ${VARIANTS[variant]} ${className}`}
+      className={`${fullWidth ? 'w-full' : ''} flex items-center justify-center gap-2 font-bold text-[14px] py-2.5 rounded-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${VARIANTS[variant]} ${className}`}
       {...rest}
     >
       {children}
