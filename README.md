@@ -43,3 +43,11 @@ Health check: `GET http://localhost:5114/api/health` — returns `{ "status": "o
 - `POST /api/auth/login` — `{ email, password }`
 
 All three return `{ token, role, displayName, email }`. Passwords are hashed with BCrypt; tokens are JWTs signed with `JWT_SECRET`.
+
+## Venues
+
+- `POST /api/venues` — requires `Authorization: Bearer <token>` for a VenueOwner account. `multipart/form-data` with `Name, Type, Capacity, GoogleMapsLink, AreaName, City, Price, WeekendPrice?, Description?, Amenities[] (repeated), Images[] (repeated files)`.
+- `GET /api/venues?city=&area=&type=` — public, optional repeated query params to filter.
+- `GET /api/venues/{id}` — public.
+
+Uploaded images are served from `/uploads/venues/{venueId}/...` (not committed — gitignored under `backend/wwwroot/uploads/`).
