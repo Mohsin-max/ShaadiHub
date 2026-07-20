@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# .NET build output
+bin/
+obj/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+
+# Build artifacts
+dist/
+build/
+
+# Editor / OS
+.vs/
+.vscode/
+*.user
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
