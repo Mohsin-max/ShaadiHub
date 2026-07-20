@@ -1,7 +1,8 @@
+import { Link } from 'react-router-dom'
 import Icon from './Icon'
 
 function VenueCard({ venue }) {
-  const { image, badge, name, area, capacity, amenity, amenityIcon, price } = venue
+  const { id, image, badge, name, area, capacity, amenity, amenityIcon, price } = venue
 
   return (
     <div className="group bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300">
@@ -39,9 +40,12 @@ function VenueCard({ venue }) {
             <p className="text-[11px] text-on-surface-variant">Starting from</p>
             <p className="text-[16px] font-bold text-secondary">{price}</p>
           </div>
-          <button className="h-9 px-4 rounded-lg bg-primary text-on-primary text-[13px] font-semibold hover:bg-primary-container transition-all">
+          <Link
+            to={`/venues/${id}`}
+            className="h-9 px-4 rounded-lg bg-primary text-on-primary text-[13px] font-semibold hover:bg-primary-container transition-all flex items-center"
+          >
             Details
-          </button>
+          </Link>
         </div>
       </div>
     </div>

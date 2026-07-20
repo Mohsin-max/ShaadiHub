@@ -5,6 +5,7 @@ import ProviderDashboardPage from './pages/ProviderDashboardPage'
 import AddVenuePage from './pages/AddVenuePage'
 import BrowseVenuesPage from './pages/BrowseVenuesPage'
 import FavoritesPage from './pages/FavoritesPage'
+import VenueDetailPage from './pages/VenueDetailPage'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Route path="/provider/dashboard" element={<ProviderDashboardPage />} />
       <Route path="/provider/venues/new" element={<AddVenuePage />} />
       <Route path="/venues" element={<BrowseVenuesPage />} />
+      <Route path="/venues/:id" element={<VenueDetailPage />} />
       <Route path="/favorites" element={<FavoritesPage />} />
     </Routes>
   )
