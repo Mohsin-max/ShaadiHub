@@ -1,8 +1,16 @@
+import { Navigate, Route, Routes } from 'react-router-dom'
+import SignupPage from './pages/SignupPage'
+import LoginPage from './pages/LoginPage'
+import ProviderDashboardPage from './pages/ProviderDashboardPage'
+
 function App() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white">
-      <h1 className="text-2xl font-semibold text-gray-900">ShaadiHub</h1>
-    </div>
+    <Routes>
+      <Route path="/" element={<Navigate to="/signup" replace />} />
+      <Route path="/signup" element={<SignupPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/provider/dashboard" element={<ProviderDashboardPage />} />
+    </Routes>
   )
 }
 

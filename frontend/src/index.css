@@ -1,1 +1,112 @@
 @import "tailwindcss";
+
+@theme {
+  /* Brand colors (from ShaadiHub design system) */
+  --color-surface-variant: #dce2f3;
+  --color-primary: #300033;
+  --color-primary-fixed-dim: #f6afef;
+  --color-tertiary-fixed-dim: #ffaaf3;
+  --color-on-tertiary-fixed-variant: #772174;
+  --color-on-primary-container: #be7db9;
+  --color-surface-dim: #d3daea;
+  --color-outline: #80737d;
+  --color-on-tertiary-container: #d071c7;
+  --color-secondary-fixed: #ffdea5;
+  --color-tertiary-fixed: #ffd7f5;
+  --color-on-tertiary-fixed: #380038;
+  --color-surface-container-high: #e2e8f8;
+  --color-primary-container: #4a154b;
+  --color-secondary: #775a19;
+  --color-tertiary: #310031;
+  --color-inverse-on-surface: #ebf1ff;
+  --color-background: #f9f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-primary-fixed-variant: #693168;
+  --color-on-error: #ffffff;
+  --color-surface-container: #e7eefe;
+  --color-on-secondary: #ffffff;
+  --color-on-surface-variant: #4f434c;
+  --color-error-container: #ffdad6;
+  --color-tertiary-container: #540054;
+  --color-secondary-fixed-dim: #e9c176;
+  --color-inverse-surface: #2a313d;
+  --color-on-primary-fixed: #370139;
+  --color-on-surface: #151c27;
+  --color-on-secondary-fixed: #261900;
+  --color-on-tertiary: #ffffff;
+  --color-outline-variant: #d2c2cd;
+  --color-surface-bright: #f9f9ff;
+  --color-on-secondary-fixed-variant: #5d4201;
+  --color-surface: #f9f9ff;
+  --color-error: #ba1a1a;
+  --color-inverse-primary: #f6afef;
+  --color-surface-container-low: #f0f3ff;
+  --color-on-error-container: #93000a;
+  --color-primary-fixed: #ffd6f8;
+  --color-on-background: #151c27;
+  --color-secondary-container: #fed488;
+  --color-surface-tint: #844981;
+  --color-on-primary: #ffffff;
+  --color-on-secondary-container: #785a1a;
+  --color-surface-container-highest: #dce2f3;
+  --color-antique-gold: #c5a059;
+
+  /* Typography */
+  --font-display-lg: "Playfair Display", serif;
+  --font-display-lg-mobile: "Playfair Display", serif;
+  --font-headline-sm: "Playfair Display", serif;
+  --font-headline-md: "Playfair Display", serif;
+  --font-body-sm: "Inter", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-label-caps: "Inter", sans-serif;
+  --font-title-lg: "Inter", sans-serif;
+
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 56px;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 700;
+
+  --text-display-lg-mobile: 32px;
+  --text-display-lg-mobile--line-height: 40px;
+  --text-display-lg-mobile--letter-spacing: -0.01em;
+  --text-display-lg-mobile--font-weight: 700;
+
+  --text-headline-md: 30px;
+  --text-headline-md--line-height: 38px;
+  --text-headline-md--font-weight: 600;
+
+  --text-headline-sm: 24px;
+  --text-headline-sm--line-height: 32px;
+  --text-headline-sm--font-weight: 600;
+
+  --text-title-lg: 18px;
+  --text-title-lg--line-height: 24px;
+  --text-title-lg--font-weight: 600;
+
+  --text-body-md: 14px;
+  --text-body-md--line-height: 20px;
+  --text-body-md--font-weight: 400;
+
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 18px;
+  --text-body-sm--font-weight: 400;
+
+  --text-label-caps: 11px;
+  --text-label-caps--line-height: 16px;
+  --text-label-caps--letter-spacing: 0.05em;
+  --text-label-caps--font-weight: 600;
+
+  /* Spacing */
+  --spacing-base: 4px;
+  --spacing-margin-mobile: 16px;
+  --spacing-gutter: 20px;
+  --spacing-margin-desktop: 40px;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+}
