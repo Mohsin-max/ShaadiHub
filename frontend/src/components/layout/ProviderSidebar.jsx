@@ -1,18 +1,19 @@
+import { Link } from 'react-router-dom'
 import Icon from '../ui/Icon'
 
 const NAV_ITEMS = [
-  { icon: 'dashboard', label: 'Dashboard', active: true },
-  { icon: 'mail', label: 'Inquiries' },
-  { icon: 'event_available', label: 'Bookings' },
-  { icon: 'storefront', label: 'My Venues' },
-  { icon: 'payments', label: 'Earnings' },
-  { icon: 'settings', label: 'Settings' },
+  { icon: 'dashboard', label: 'Dashboard', to: '/provider/dashboard' },
+  { icon: 'mail', label: 'Inquiries', to: '#' },
+  { icon: 'event_available', label: 'Bookings', to: '#' },
+  { icon: 'storefront', label: 'My Venues', to: '#' },
+  { icon: 'payments', label: 'Earnings', to: '#' },
+  { icon: 'settings', label: 'Settings', to: '#' },
 ]
 
 const PROFILE_IMAGE =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuAN7Oa5EjnIP4Bq91N9yq18t9hKJqAk6ycgf5lgXTlsNxoA-u3JXaSiU_OIWlrgSfA9vBGNLNMR_XKkOpHM856Xf95SPkeUkhVP2jQLu16_obAE2LesXWMay8wuxquO_hz86iqI3DdhneXjcAiNRr7gU9RseftTMC0Zdt7q6d349c1umA7qfmHLQfJMH803mhko4DL2tURjcsXyqhyigYKp0ae9xHpXGAj86HuOdrdrabC-_bOULnttNsQ4PxjIQ3IsjbtCUqoo6KQ'
 
-function ProviderSidebar({ venueName = 'Royal Palms Marquee' }) {
+function ProviderSidebar({ venueName = 'Royal Palms Marquee', activeLabel = 'Dashboard' }) {
   return (
     <aside className="hidden md:flex flex-col h-screen w-52 bg-primary text-on-primary shadow-lg fixed left-0 top-0 z-50">
       <div className="px-4 py-4">
@@ -35,27 +36,33 @@ function ProviderSidebar({ venueName = 'Royal Palms Marquee' }) {
       </div>
 
       <nav className="flex-1 space-y-0.5">
-        {NAV_ITEMS.map((item) => (
-          <a
-            key={item.label}
-            href="#"
-            className={`flex items-center gap-2.5 mx-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-              item.active
-                ? 'bg-secondary-container text-on-secondary-container font-bold'
-                : 'text-on-primary/80 hover:bg-primary-container'
-            }`}
-          >
-            <Icon name={item.icon} className="text-[18px]" />
-            <span className="font-label-caps text-[10px] uppercase">{item.label}</span>
-          </a>
-        ))}
+        {NAV_ITEMS.map((item) => {
+          const isActive = item.label === activeLabel
+          return (
+            <Link
+              key={item.label}
+              to={item.to}
+              className={`flex items-center gap-2.5 mx-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                isActive
+                  ? 'bg-secondary-container text-on-secondary-container font-bold'
+                  : 'text-on-primary/80 hover:bg-primary-container'
+              }`}
+            >
+              <Icon name={item.icon} className="text-[18px]" />
+              <span className="font-label-caps text-[10px] uppercase">{item.label}</span>
+            </Link>
+          )
+        })}
       </nav>
 
       <div className="px-3 py-4 space-y-2">
-        <button className="w-full py-2 px-3 bg-secondary text-on-secondary rounded-lg font-bold text-xs uppercase tracking-wide hover:brightness-110 transition-all flex items-center justify-center gap-1.5">
+        <Link
+          to="/provider/venues/new"
+          className="w-full py-2 px-3 bg-secondary text-on-secondary rounded-lg font-bold text-xs uppercase tracking-wide hover:brightness-110 transition-all flex items-center justify-center gap-1.5"
+        >
           <Icon name="add" className="text-[16px]" />
           Add New Venue
-        </button>
+        </Link>
         <div className="pt-2 border-t border-on-primary/10">
           <a
             href="#"

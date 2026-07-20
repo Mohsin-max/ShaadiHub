@@ -15,7 +15,7 @@ function SignupPage() {
   const [activeForm, setActiveForm] = useState('client')
 
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+    <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col w-full">
       <PublicHeader />
 
       <AuthLayout

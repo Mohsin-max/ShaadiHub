@@ -6,10 +6,10 @@ const VARIANTS = {
     'bg-white border border-outline-variant text-primary hover:bg-surface-container',
 }
 
-function Button({ variant = 'primary', className = '', children, ...rest }) {
+function Button({ variant = 'primary', fullWidth = true, className = '', children, ...rest }) {
   return (
     <button
-      className={`w-full flex items-center justify-center gap-2 font-bold text-[14px] py-2.5 rounded-lg transition-all active:scale-[0.98] ${VARIANTS[variant]} ${className}`}
+      className={`${fullWidth ? 'w-full' : ''} flex items-center justify-center gap-2 font-bold text-[14px] py-2.5 rounded-lg transition-all active:scale-[0.98] ${VARIANTS[variant]} ${className}`}
       {...rest}
     >
       {children}
