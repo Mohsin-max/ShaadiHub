@@ -15,6 +15,9 @@ appsettings.*.local.json
 dist/
 build/
 
+# Uploaded user content
+backend/wwwroot/uploads/
+
 # Editor / OS
 .vs/
 .vscode/

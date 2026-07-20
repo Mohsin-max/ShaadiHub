@@ -4,6 +4,7 @@ const STEPS = [
   { icon: 'info', label: 'Venue Details' },
   { icon: 'location_on', label: 'Location' },
   { icon: 'payments', label: 'Pricing' },
+  { icon: 'sell', label: 'Amenities' },
   { icon: 'photo_camera', label: 'Photos' },
 ]
 

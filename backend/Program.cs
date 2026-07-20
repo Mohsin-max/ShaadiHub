@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 
 DotNetEnv.Env.Load();
 
+Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "venues"));
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -26,6 +28,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ImageStorageService>();
 
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
     ?? throw new InvalidOperationException("JWT_SECRET is not configured.");
@@ -72,6 +75,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseCors(FrontendCorsPolicy);
 

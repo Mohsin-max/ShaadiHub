@@ -1,10 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5114/api'
 
 async function request(path, options = {}) {
+  const isFormData = options.body instanceof FormData
+
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...options.headers,
     },
   })
@@ -20,6 +22,10 @@ async function request(path, options = {}) {
   return data
 }
 
+function authHeaders(token) {
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
 export function signupClient(payload) {
   return request('/auth/signup/client', { method: 'POST', body: JSON.stringify(payload) })
 }
@@ -30,4 +36,21 @@ export function signupProvider(payload) {
 
 export function login(payload) {
   return request('/auth/login', { method: 'POST', body: JSON.stringify(payload) })
+}
+
+export function createVenue(formData, token) {
+  return request('/venues', { method: 'POST', body: formData, headers: authHeaders(token) })
+}
+
+export function listVenues({ city = [], area = [], type = [] } = {}) {
+  const params = new URLSearchParams()
+  city.forEach((c) => params.append('city', c))
+  area.forEach((a) => params.append('area', a))
+  type.forEach((t) => params.append('type', t))
+  const query = params.toString()
+  return request(`/venues${query ? `?${query}` : ''}`)
+}
+
+export function getVenue(id) {
+  return request(`/venues/${id}`)
 }

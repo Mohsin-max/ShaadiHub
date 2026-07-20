@@ -1,62 +1,106 @@
-import { useState } from 'react'
-
-const NEIGHBORHOODS = ['DHA', 'Clifton', 'Gulshan-e-Iqbal', 'Gulberg', 'Model Town', 'Nazimabad']
-const VENUE_TYPES = ['All', 'Banquet', 'Lawn', 'Hotel']
-
-function FilterSidebar() {
-  const [activeType, setActiveType] = useState('All')
+function FilterSidebar({
+  cities = [],
+  areas = [],
+  types = [],
+  selectedCities = [],
+  selectedAreas = [],
+  selectedTypes = [],
+  onCityToggle,
+  onAreaToggle,
+  onTypeToggle,
+  onClearAll,
+}) {
+  const hasActiveFilters =
+    selectedCities.length > 0 || selectedAreas.length > 0 || selectedTypes.length > 0
 
   return (
     <aside className="hidden md:block w-64 h-[calc(100vh-56px)] fixed left-0 top-14 bg-surface-container-lowest border-r border-outline-variant p-5 overflow-y-auto">
       <div className="flex items-center justify-between mb-5">
         <h2 className="font-headline-sm text-[16px] text-primary">Filters</h2>
-        <button className="text-[11px] text-secondary hover:underline transition-all">
-          Clear All
-        </button>
+        {hasActiveFilters && (
+          <button
+            onClick={onClearAll}
+            className="text-[11px] text-secondary hover:underline transition-all"
+          >
+            Clear All
+          </button>
+        )}
       </div>
 
       <div className="space-y-6">
-        {/* Neighborhood */}
+        {/* City */}
         <div>
           <h3 className="font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
-            Neighborhood
+            City
           </h3>
-          <div className="space-y-2.5">
-            {NEIGHBORHOODS.map((area) => (
-              <label key={area} className="flex items-center gap-2.5 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary"
-                />
-                <span className="text-[13px] text-on-surface-variant group-hover:text-primary transition-colors">
-                  {area}
-                </span>
-              </label>
-            ))}
-          </div>
+          {cities.length === 0 ? (
+            <p className="text-[12px] text-on-surface-variant italic">No venues yet</p>
+          ) : (
+            <div className="space-y-2.5">
+              {cities.map((city) => (
+                <label key={city} className="flex items-center gap-2.5 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={selectedCities.includes(city)}
+                    onChange={() => onCityToggle?.(city)}
+                    className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary"
+                  />
+                  <span className="text-[13px] text-on-surface-variant group-hover:text-primary transition-colors">
+                    {city}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Venue Type */}
-        <div>
-          <h3 className="font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
-            Venue Type
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {VENUE_TYPES.map((type) => (
-              <button
-                key={type}
-                onClick={() => setActiveType(type)}
-                className={`px-3 py-1.5 rounded-full border text-[11px] transition-all ${
-                  activeType === type
-                    ? 'border-primary bg-primary text-on-primary'
-                    : 'border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
+        {/* Neighborhood / Area */}
+        {areas.length > 0 && (
+          <div>
+            <h3 className="font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+              Neighborhood
+            </h3>
+            <div className="space-y-2.5">
+              {areas.map((area) => (
+                <label key={area} className="flex items-center gap-2.5 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={selectedAreas.includes(area)}
+                    onChange={() => onAreaToggle?.(area)}
+                    className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary"
+                  />
+                  <span className="text-[13px] text-on-surface-variant group-hover:text-primary transition-colors">
+                    {area}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Venue Type */}
+        {types.length > 0 && (
+          <div>
+            <h3 className="font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+              Venue Type
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {types.map((type) => (
+                <button
+                  key={type}
+                  onClick={() => onTypeToggle?.(type)}
+                  className={`px-3 py-1.5 rounded-full border text-[11px] transition-all ${
+                    selectedTypes.includes(type)
+                      ? 'border-primary bg-primary text-on-primary'
+                      : 'border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Capacity */}
         <div>

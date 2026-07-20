@@ -7,8 +7,12 @@ function ProviderCard({ name, role, photo, onSendRequest }) {
       <h4 className="font-headline-sm text-[18px] text-primary mb-5">Venue Provider</h4>
 
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-secondary-fixed shrink-0">
-          <img className="w-full h-full object-cover" src={photo} alt={name} />
+        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-secondary-fixed shrink-0 bg-secondary-container flex items-center justify-center">
+          {photo ? (
+            <img className="w-full h-full object-cover" src={photo} alt={name} />
+          ) : (
+            <Icon name="storefront" className="text-on-secondary-container text-[20px]" />
+          )}
         </div>
         <div>
           <p className="text-[14px] font-bold text-on-surface">{name}</p>
