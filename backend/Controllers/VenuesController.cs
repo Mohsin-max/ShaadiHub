@@ -27,6 +27,11 @@ public class VenuesController : ControllerBase
     [RequestSizeLimit(50_000_000)]
     public async Task<IActionResult> Create([FromForm] CreateVenueRequest request)
     {
+        if (request.Images.Count < 4)
+        {
+            return BadRequest(new { message = "Please upload at least 4 photos of the venue." });
+        }
+
         var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         var venue = new Venue
@@ -41,6 +46,12 @@ public class VenuesController : ControllerBase
             Price = request.Price,
             WeekendPrice = request.WeekendPrice,
             Description = request.Description?.Trim(),
+            Catering = request.Catering.Trim(),
+            ParkingSpaces = request.ParkingSpaces,
+            RefundPolicy = request.RefundPolicy.Trim(),
+            SpecialEntryEnabled = request.SpecialEntryEnabled,
+            SpecialEntryPrice = request.SpecialEntryEnabled ? request.SpecialEntryPrice : null,
+            SpecialEntryDescription = request.SpecialEntryEnabled ? request.SpecialEntryDescription?.Trim() : null,
             Amenities = request.Amenities
                 .Select(a => a.Trim())
                 .Where(a => a.Length > 0)
@@ -90,6 +101,12 @@ public class VenuesController : ControllerBase
             return Forbid();
         }
 
+        var remainingExistingCount = venue.Images.Count(i => !request.RemoveImageIds.Contains(i.Id));
+        if (remainingExistingCount + request.Images.Count < 4)
+        {
+            return BadRequest(new { message = "A venue must have at least 4 photos." });
+        }
+
         venue.Name = request.Name.Trim();
         venue.Type = request.Type.Trim();
         venue.Capacity = request.Capacity;
@@ -99,6 +116,12 @@ public class VenuesController : ControllerBase
         venue.Price = request.Price;
         venue.WeekendPrice = request.WeekendPrice;
         venue.Description = request.Description?.Trim();
+        venue.Catering = request.Catering.Trim();
+        venue.ParkingSpaces = request.ParkingSpaces;
+        venue.RefundPolicy = request.RefundPolicy.Trim();
+        venue.SpecialEntryEnabled = request.SpecialEntryEnabled;
+        venue.SpecialEntryPrice = request.SpecialEntryEnabled ? request.SpecialEntryPrice : null;
+        venue.SpecialEntryDescription = request.SpecialEntryEnabled ? request.SpecialEntryDescription?.Trim() : null;
         venue.Amenities = request.Amenities
             .Select(a => a.Trim())
             .Where(a => a.Length > 0)
@@ -212,6 +235,12 @@ public class VenuesController : ControllerBase
             Price = venue.Price,
             WeekendPrice = venue.WeekendPrice,
             Description = venue.Description,
+            Catering = venue.Catering,
+            ParkingSpaces = venue.ParkingSpaces,
+            RefundPolicy = venue.RefundPolicy,
+            SpecialEntryEnabled = venue.SpecialEntryEnabled,
+            SpecialEntryPrice = venue.SpecialEntryPrice,
+            SpecialEntryDescription = venue.SpecialEntryDescription,
             Amenities = venue.Amenities,
             Images = venue.Images
                 .OrderBy(i => i.SortOrder)

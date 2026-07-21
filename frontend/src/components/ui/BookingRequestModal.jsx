@@ -8,18 +8,22 @@ function todayISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function BookingRequestModal({ open, onClose, venueName }) {
+function BookingRequestModal({ open, onClose, venueName, initialPrice }) {
   const [selectedDate, setSelectedDate] = useState('')
   const [price, setPrice] = useState('')
   const [note, setNote] = useState('')
+  const [priceTouched, setPriceTouched] = useState(false)
 
   if (!open) return null
+
+  const displayPrice = priceTouched ? price : initialPrice ? String(initialPrice) : price
 
   const handleSubmit = (e) => {
     e.preventDefault()
     onClose()
     setSelectedDate('')
     setPrice('')
+    setPriceTouched(false)
     setNote('')
   }
 
@@ -71,8 +75,11 @@ function BookingRequestModal({ open, onClose, venueName }) {
             prefix="Rs."
             type="number"
             placeholder="e.g. 450,000"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            value={displayPrice}
+            onChange={(e) => {
+              setPriceTouched(true)
+              setPrice(e.target.value)
+            }}
           />
 
           <div className="space-y-1">

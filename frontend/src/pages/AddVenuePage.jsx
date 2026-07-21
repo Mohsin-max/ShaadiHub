@@ -18,6 +18,14 @@ function AddVenuePage() {
     formData.append('City', form.city)
     formData.append('Price', form.price)
     if (form.weekendPrice) formData.append('WeekendPrice', form.weekendPrice)
+    formData.append('Catering', form.catering)
+    if (form.parkingSpaces) formData.append('ParkingSpaces', form.parkingSpaces)
+    formData.append('RefundPolicy', form.refundPolicy)
+    formData.append('SpecialEntryEnabled', String(form.specialEntryEnabled))
+    if (form.specialEntryEnabled) {
+      formData.append('SpecialEntryPrice', form.specialEntryPrice)
+      formData.append('SpecialEntryDescription', form.specialEntryDescription)
+    }
     amenities.forEach((tag) => formData.append('Amenities', tag))
     newPhotos.forEach((file) => formData.append('Images', file))
 

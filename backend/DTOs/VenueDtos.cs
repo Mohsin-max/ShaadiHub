@@ -5,7 +5,7 @@ namespace backend.DTOs;
 
 public class CreateVenueRequest
 {
-    [Required, MaxLength(150)]
+    [Required, MinLength(3), MaxLength(150)]
     public string Name { get; set; } = string.Empty;
 
     [Required, MaxLength(50)]
@@ -29,6 +29,21 @@ public class CreateVenueRequest
     public decimal? WeekendPrice { get; set; }
 
     public string? Description { get; set; }
+
+    [Required, MaxLength(20)]
+    public string Catering { get; set; } = string.Empty;
+
+    [Range(0, 100000)]
+    public int? ParkingSpaces { get; set; }
+
+    [Required, MaxLength(20)]
+    public string RefundPolicy { get; set; } = string.Empty;
+
+    public bool SpecialEntryEnabled { get; set; }
+
+    public decimal? SpecialEntryPrice { get; set; }
+
+    public string? SpecialEntryDescription { get; set; }
 
     public List<string> Amenities { get; set; } = new();
 
@@ -37,7 +52,7 @@ public class CreateVenueRequest
 
 public class UpdateVenueRequest
 {
-    [Required, MaxLength(150)]
+    [Required, MinLength(3), MaxLength(150)]
     public string Name { get; set; } = string.Empty;
 
     [Required, MaxLength(50)]
@@ -61,6 +76,21 @@ public class UpdateVenueRequest
     public decimal? WeekendPrice { get; set; }
 
     public string? Description { get; set; }
+
+    [Required, MaxLength(20)]
+    public string Catering { get; set; } = string.Empty;
+
+    [Range(0, 100000)]
+    public int? ParkingSpaces { get; set; }
+
+    [Required, MaxLength(20)]
+    public string RefundPolicy { get; set; } = string.Empty;
+
+    public bool SpecialEntryEnabled { get; set; }
+
+    public decimal? SpecialEntryPrice { get; set; }
+
+    public string? SpecialEntryDescription { get; set; }
 
     public List<string> Amenities { get; set; } = new();
 
@@ -87,6 +117,12 @@ public class VenueResponse
     public decimal Price { get; set; }
     public decimal? WeekendPrice { get; set; }
     public string? Description { get; set; }
+    public string Catering { get; set; } = string.Empty;
+    public int? ParkingSpaces { get; set; }
+    public string RefundPolicy { get; set; } = string.Empty;
+    public bool SpecialEntryEnabled { get; set; }
+    public decimal? SpecialEntryPrice { get; set; }
+    public string? SpecialEntryDescription { get; set; }
     public List<string> Amenities { get; set; } = new();
     public List<VenueImageResponse> Images { get; set; } = new();
     public int OwnerId { get; set; }

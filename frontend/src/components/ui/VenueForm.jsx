@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import FormField from './FormField'
 import SelectField from './SelectField'
 import TagInput from './TagInput'
+import ToggleSwitch from './ToggleSwitch'
 import Button from './Button'
 import Icon from './Icon'
 import ErrorBanner from './ErrorBanner'
@@ -18,14 +19,23 @@ const FOOTER_LINKS = [
   { label: 'Partner Program', href: '#' },
 ]
 
-function FormSection({ icon, title, children }) {
+const MIN_PHOTOS = 4
+const MIN_NAME_LENGTH = 3
+
+function FormSection({ number, icon, title, subtitle, children }) {
   return (
-    <section className="bg-white border border-outline-variant/50 rounded-xl p-6 shadow-sm transition-shadow">
+    <section className="bg-white border border-outline-variant/50 rounded-xl p-6 md:p-7 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-center mb-5">
-        <div className="w-8 h-8 rounded-full bg-primary-container/10 flex items-center justify-center mr-3">
+        <div className="relative w-9 h-9 rounded-full bg-primary-container/10 flex items-center justify-center mr-3 shrink-0">
           <Icon name={icon} className="text-primary-container text-[18px]" />
+          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-antique-gold text-primary text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+            {number}
+          </span>
         </div>
-        <h2 className="font-title-lg text-[15px] text-primary">{title}</h2>
+        <div>
+          <h2 className="font-title-lg text-[15px] text-primary leading-tight">{title}</h2>
+          {subtitle && <p className="text-[11px] text-on-surface-variant mt-0.5">{subtitle}</p>}
+        </div>
       </div>
       {children}
     </section>
@@ -41,6 +51,12 @@ export const EMPTY_VENUE_FORM = {
   city: '',
   price: '',
   weekendPrice: '',
+  catering: 'Internal',
+  parkingSpaces: '',
+  refundPolicy: 'Non-Refundable',
+  specialEntryEnabled: false,
+  specialEntryPrice: '',
+  specialEntryDescription: '',
 }
 
 function VenueForm({
@@ -53,7 +69,7 @@ function VenueForm({
   initialImages = [],
   onSubmit,
 }) {
-  const [form, setForm] = useState(initialValues)
+  const [form, setForm] = useState({ ...EMPTY_VENUE_FORM, ...initialValues })
   const [amenities, setAmenities] = useState(initialAmenities)
   const [existingImages, setExistingImages] = useState(initialImages)
   const [removedImageIds, setRemovedImageIds] = useState([])
@@ -103,15 +119,18 @@ function VenueForm({
     setAreaDropdownOpen(false)
   }
 
+  const totalPhotos = existingImages.length + photos.length
+  const nameValid = form.name.trim().length >= MIN_NAME_LENGTH
+  const specialEntryValid = !form.specialEntryEnabled || Boolean(form.specialEntryPrice && form.specialEntryDescription.trim())
+
   const sectionsComplete = [
-    Boolean(form.name && form.type && form.capacity),
+    Boolean(nameValid && form.type && form.capacity),
     Boolean(form.googleMapsLink && form.areaName && form.city),
     Boolean(form.price),
+    Boolean(form.catering && form.refundPolicy && specialEntryValid),
     amenities.length > 0,
-    existingImages.length > 0 || photos.length > 0,
+    totalPhotos >= MIN_PHOTOS,
   ]
-  const firstIncomplete = sectionsComplete.findIndex((done) => !done)
-  const currentStep = firstIncomplete === -1 ? sectionsComplete.length : firstIncomplete
 
   const updateField = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
@@ -143,8 +162,26 @@ function VenueForm({
     setRemovedImageIds((prev) => [...prev, id])
   }
 
+  const validate = () => {
+    if (!nameValid) {
+      return `Venue name must be at least ${MIN_NAME_LENGTH} characters.`
+    }
+    if (totalPhotos < MIN_PHOTOS) {
+      return `Please add at least ${MIN_PHOTOS} photos of the venue (currently ${totalPhotos}).`
+    }
+    if (form.specialEntryEnabled && !specialEntryValid) {
+      return 'Special Entry is on — please add its charges and a short description, or turn it off.'
+    }
+    return ''
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const validationError = validate()
+    if (validationError) {
+      setError(validationError)
+      return
+    }
     setError('')
     setLoading(true)
     try {
@@ -195,22 +232,30 @@ function VenueForm({
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
-        <form className="max-w-4xl mx-auto px-5 md:px-6 py-6 flex gap-5" onSubmit={handleSubmit}>
+        <form className="max-w-6xl mx-auto px-5 md:px-6 py-6 flex gap-6" onSubmit={handleSubmit}>
           {/* Left Column: Form */}
           <div className="flex-1 min-w-0 space-y-5">
             <ErrorBanner message={error} />
 
-            <FormSection icon="info" title="Section 1: Venue Details">
+            <FormSection number={1} icon="info" title="Venue Details" subtitle="What guests will see first">
               <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  className="col-span-2"
-                  label="Venue Name"
-                  type="text"
-                  placeholder="e.g. Grand Emerald Marquee"
-                  required
-                  value={form.name}
-                  onChange={updateField('name')}
-                />
+                <div className="col-span-2">
+                  <FormField
+                    label="Venue Name"
+                    type="text"
+                    placeholder="e.g. Grand Emerald Marquee"
+                    required
+                    value={form.name}
+                    onChange={updateField('name')}
+                  />
+                  <p className={`text-[11px] mt-1 ${form.name.length === 0 ? 'text-on-surface-variant' : nameValid ? 'text-secondary' : 'text-error'}`}>
+                    {form.name.length === 0
+                      ? `Minimum ${MIN_NAME_LENGTH} characters`
+                      : nameValid
+                        ? 'Looks good'
+                        : `Needs at least ${MIN_NAME_LENGTH} characters (${form.name.trim().length}/${MIN_NAME_LENGTH})`}
+                  </p>
+                </div>
                 <SelectField label="Venue Type" value={form.type} onChange={updateField('type')}>
                   {VENUE_TYPES.map((type) => (
                     <option key={type}>{type}</option>
@@ -228,7 +273,7 @@ function VenueForm({
               </div>
             </FormSection>
 
-            <FormSection icon="location_on" title="Section 2: Location">
+            <FormSection number={2} icon="location_on" title="Location" subtitle="Help clients find you">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   className="col-span-2"
@@ -292,7 +337,7 @@ function VenueForm({
               </div>
             </FormSection>
 
-            <FormSection icon="payments" title="Section 3: Pricing">
+            <FormSection number={3} icon="payments" title="Pricing" subtitle="Your base rates in PKR">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   label="Price (PKR)"
@@ -316,7 +361,66 @@ function VenueForm({
               </div>
             </FormSection>
 
-            <FormSection icon="sell" title="Section 4: Amenities">
+            <FormSection number={4} icon="settings_suggest" title="Facilities & Policies" subtitle="Catering, parking, refunds & add-ons">
+              <div className="grid grid-cols-2 gap-4">
+                <SelectField label="Catering" value={form.catering} onChange={updateField('catering')}>
+                  <option value="Internal">Provided by Venue (Internal)</option>
+                  <option value="External">Bring Your Own (External)</option>
+                  <option value="Both">Both Allowed</option>
+                </SelectField>
+                <FormField
+                  label="Parking Capacity (Vehicles)"
+                  type="number"
+                  placeholder="e.g. 100 — optional"
+                  min={0}
+                  value={form.parkingSpaces}
+                  onChange={updateField('parkingSpaces')}
+                />
+                <SelectField label="Refund Policy" value={form.refundPolicy} onChange={updateField('refundPolicy')}>
+                  <option value="Non-Refundable">Non-Refundable</option>
+                  <option value="Refundable">Refundable</option>
+                </SelectField>
+              </div>
+
+              <div className="mt-5 pt-5 border-t border-outline-variant/50">
+                <ToggleSwitch
+                  checked={form.specialEntryEnabled}
+                  onChange={(checked) => setForm((prev) => ({ ...prev, specialEntryEnabled: checked }))}
+                  label="Special Entry Option"
+                  description="Offer an optional premium/grand entry add-on that clients can select at extra cost."
+                />
+
+                {form.specialEntryEnabled && (
+                  <div className="grid grid-cols-2 gap-4 mt-4 pl-14">
+                    <FormField
+                      label="Special Entry Charges (PKR)"
+                      prefix="Rs."
+                      type="number"
+                      placeholder="e.g. 25,000"
+                      min={0}
+                      required
+                      value={form.specialEntryPrice}
+                      onChange={updateField('specialEntryPrice')}
+                    />
+                    <div className="col-span-2 space-y-1">
+                      <label className="block font-bold text-[11px] text-primary uppercase tracking-wider">
+                        Special Entry Description
+                      </label>
+                      <textarea
+                        rows={2}
+                        required
+                        value={form.specialEntryDescription}
+                        onChange={updateField('specialEntryDescription')}
+                        placeholder="Describe what's included, e.g. dhol, fireworks, decorated entrance walk..."
+                        className="w-full px-3.5 py-2.5 text-[14px] bg-white border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all resize-none"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </FormSection>
+
+            <FormSection number={5} icon="sell" title="Amenities" subtitle="What's included with a booking">
               <TagInput
                 tags={amenities}
                 onChange={setAmenities}
@@ -324,7 +428,7 @@ function VenueForm({
               />
             </FormSection>
 
-            <FormSection icon="photo_library" title="Section 5: Photos">
+            <FormSection number={6} icon="photo_library" title="Photos" subtitle={`At least ${MIN_PHOTOS} high-quality photos required`}>
               <label className="block border-2 border-dashed border-outline-variant hover:border-secondary transition-colors rounded-xl p-8 text-center bg-background group cursor-pointer">
                 <input
                   type="file"
@@ -345,9 +449,16 @@ function VenueForm({
                 </span>
               </label>
 
-              <div className="mt-5 grid grid-cols-4 gap-3">
+              <div className="flex items-center justify-between mt-4 mb-1">
+                <p className="text-[12px] font-semibold text-on-surface-variant">Uploaded photos</p>
+                <p className={`text-[12px] font-bold ${totalPhotos >= MIN_PHOTOS ? 'text-secondary' : 'text-error'}`}>
+                  {totalPhotos} / {MIN_PHOTOS} minimum
+                </p>
+              </div>
+
+              <div className="grid grid-cols-4 gap-3">
                 {existingImages.length === 0 && photos.length === 0 ? (
-                  <div className="aspect-video bg-surface-container rounded-lg border border-outline-variant flex items-center justify-center text-outline text-[11px] italic">
+                  <div className="col-span-4 aspect-[16/5] bg-surface-container rounded-lg border border-outline-variant flex items-center justify-center text-outline text-[11px] italic">
                     No photos yet
                   </div>
                 ) : (
@@ -394,7 +505,7 @@ function VenueForm({
           </div>
 
           {/* Right Column: Progress */}
-          <VenueProgressSidebar currentStep={currentStep} />
+          <VenueProgressSidebar sectionsComplete={sectionsComplete} />
         </form>
 
         <PageFooter links={FOOTER_LINKS} />

@@ -32,6 +32,7 @@ public class AppDbContext : DbContext
 
             entity.Property(v => v.Price).HasColumnType("decimal(12,2)");
             entity.Property(v => v.WeekendPrice).HasColumnType("decimal(12,2)");
+            entity.Property(v => v.SpecialEntryPrice).HasColumnType("decimal(12,2)");
 
             var amenitiesComparer = new ValueComparer<List<string>>(
                 (a, b) => (a ?? new()).SequenceEqual(b ?? new()),

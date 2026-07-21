@@ -31,6 +31,14 @@ function EditVenuePage() {
     formData.append('City', form.city)
     formData.append('Price', form.price)
     if (form.weekendPrice) formData.append('WeekendPrice', form.weekendPrice)
+    formData.append('Catering', form.catering)
+    if (form.parkingSpaces) formData.append('ParkingSpaces', form.parkingSpaces)
+    formData.append('RefundPolicy', form.refundPolicy)
+    formData.append('SpecialEntryEnabled', String(form.specialEntryEnabled))
+    if (form.specialEntryEnabled) {
+      formData.append('SpecialEntryPrice', form.specialEntryPrice)
+      formData.append('SpecialEntryDescription', form.specialEntryDescription)
+    }
     amenities.forEach((tag) => formData.append('Amenities', tag))
     newPhotos.forEach((file) => formData.append('Images', file))
     removeImageIds.forEach((imgId) => formData.append('RemoveImageIds', imgId))
@@ -79,6 +87,12 @@ function EditVenuePage() {
             city: venue.city,
             price: String(venue.price),
             weekendPrice: venue.weekendPrice ? String(venue.weekendPrice) : '',
+            catering: venue.catering || 'Internal',
+            parkingSpaces: venue.parkingSpaces ? String(venue.parkingSpaces) : '',
+            refundPolicy: venue.refundPolicy || 'Non-Refundable',
+            specialEntryEnabled: venue.specialEntryEnabled || false,
+            specialEntryPrice: venue.specialEntryPrice ? String(venue.specialEntryPrice) : '',
+            specialEntryDescription: venue.specialEntryDescription || '',
           }}
           initialAmenities={venue.amenities}
           initialImages={venue.images}

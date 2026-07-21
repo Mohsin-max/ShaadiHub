@@ -7,9 +7,16 @@ import VenueGallery from '../components/ui/VenueGallery'
 import AmenitiesGrid from '../components/ui/AmenitiesGrid'
 import AvailabilityCalendar from '../components/ui/AvailabilityCalendar'
 import ProviderCard from '../components/ui/ProviderCard'
+import PriceSummaryCard from '../components/ui/PriceSummaryCard'
 import BookingRequestModal from '../components/ui/BookingRequestModal'
 import VenueDetailSkeleton from '../components/ui/VenueDetailSkeleton'
 import { getVenue } from '../utils/api'
+
+const CATERING_LABELS = {
+  Internal: 'Provided by Venue',
+  External: 'Bring Your Own',
+  Both: 'Internal or External — Both Allowed',
+}
 
 const FOOTER_LINKS = [
   { label: 'About', href: '#' },
@@ -34,6 +41,7 @@ function VenueDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
+  const [specialEntrySelected, setSpecialEntrySelected] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -166,11 +174,62 @@ function VenueDetailPage() {
                 <AmenitiesGrid amenities={venue.amenities} hideHeading />
               </div>
 
+              <div>
+                <h3 className="font-headline-sm text-[18px] text-primary mb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 rounded-full bg-antique-gold inline-block" />
+                  Facilities & Policies
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="flex items-start gap-3 p-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant">
+                    <div className="h-8 w-8 shrink-0 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <Icon name="restaurant" className="text-[16px]" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">
+                        Catering
+                      </p>
+                      <p className="text-[13px] font-bold text-on-surface leading-snug">
+                        {CATERING_LABELS[venue.catering] || venue.catering}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant">
+                    <div className="h-8 w-8 shrink-0 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <Icon name="local_parking" className="text-[16px]" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">
+                        Parking
+                      </p>
+                      <p className="text-[13px] font-bold text-on-surface leading-snug">
+                        {venue.parkingSpaces ? `${venue.parkingSpaces} vehicles` : 'Not specified'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant">
+                    <div className="h-8 w-8 shrink-0 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <Icon name="policy" className="text-[16px]" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">
+                        Refund Policy
+                      </p>
+                      <p className="text-[13px] font-bold text-on-surface leading-snug">{venue.refundPolicy}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <AvailabilityCalendar bookedDays={[8, 15, 22]} />
             </div>
 
             {/* Right Sidebar */}
             <div className="space-y-5">
+              <PriceSummaryCard
+                venue={venue}
+                specialEntrySelected={specialEntrySelected}
+                onToggleSpecialEntry={setSpecialEntrySelected}
+              />
               <ProviderCard
                 name={venue.ownerName}
                 role="Venue Owner"
@@ -184,7 +243,12 @@ function VenueDetailPage() {
 
       <PageFooter links={FOOTER_LINKS} />
 
-      <BookingRequestModal open={modalOpen} onClose={() => setModalOpen(false)} venueName={venue.name} />
+      <BookingRequestModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        venueName={venue.name}
+        initialPrice={venue.price + (specialEntrySelected ? Number(venue.specialEntryPrice || 0) : 0)}
+      />
     </div>
   )
 }
