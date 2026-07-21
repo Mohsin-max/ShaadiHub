@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using backend.Data;
 using backend.DTOs;
 using backend.Models;
 using backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -85,6 +87,23 @@ public class AuthController : ControllerBase
         return Ok(BuildAuthResponse(user));
     }
 
+    [HttpPut("phone")]
+    [Authorize]
+    public async Task<IActionResult> UpdatePhone(UpdatePhoneRequest request)
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var user = await _context.Users.FindAsync(userId);
+        if (user is null)
+        {
+            return NotFound(new { message = "User not found." });
+        }
+
+        user.Phone = request.Phone.Trim();
+        await _context.SaveChangesAsync();
+
+        return Ok(BuildAuthResponse(user));
+    }
+
     private AuthResponse BuildAuthResponse(User user)
     {
         var displayName = user.Role == UserRole.Client
@@ -98,6 +117,7 @@ public class AuthController : ControllerBase
             Role = user.Role.ToString(),
             DisplayName = displayName,
             Email = user.Email,
+            Phone = user.Phone,
         };
     }
 }

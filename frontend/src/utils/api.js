@@ -38,6 +38,14 @@ export function login(payload) {
   return request('/auth/login', { method: 'POST', body: JSON.stringify(payload) })
 }
 
+export function updatePhone(phone, token) {
+  return request('/auth/phone', {
+    method: 'PUT',
+    body: JSON.stringify({ phone }),
+    headers: authHeaders(token),
+  })
+}
+
 export function createVenue(formData, token) {
   return request('/venues', { method: 'POST', body: formData, headers: authHeaders(token) })
 }

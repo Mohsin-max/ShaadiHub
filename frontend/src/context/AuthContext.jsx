@@ -45,8 +45,14 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(STORAGE_KEY)
   }
 
+  const updatePhone = async (phone) => {
+    const data = await api.updatePhone(phone, auth?.token)
+    persist(data)
+    return data
+  }
+
   const value = useMemo(
-    () => ({ user: auth, signupClient, signupProvider, login, logout }),
+    () => ({ user: auth, signupClient, signupProvider, login, logout, updatePhone }),
     [auth],
   )
 

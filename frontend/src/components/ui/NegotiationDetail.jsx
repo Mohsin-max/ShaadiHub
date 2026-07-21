@@ -4,6 +4,7 @@ import Icon from './Icon'
 import Button from './Button'
 import StatusBadge from './StatusBadge'
 import ErrorBanner from './ErrorBanner'
+import ConfirmModal from './ConfirmModal'
 
 function formatPrice(value) {
   return `Rs. ${Number(value).toLocaleString('en-PK')}`
@@ -33,6 +34,7 @@ function NegotiationDetail({ request, venueHref, onRespond, responding, respondE
   const [counterPrice, setCounterPrice] = useState('')
   const [counterNote, setCounterNote] = useState('')
   const [rejectReason, setRejectReason] = useState('')
+  const [confirmMode, setConfirmMode] = useState(null)
 
   const cancelAction = () => setActionMode(null)
 
@@ -41,9 +43,30 @@ function NegotiationDetail({ request, venueHref, onRespond, responding, respondE
     onRespond('Counter', { price: Number(counterPrice), note: counterNote.trim() || null })
   }
 
-  const submitReject = () => {
-    if (!rejectReason.trim()) return
-    onRespond('Reject', { note: rejectReason.trim() })
+  const counterpartLabel = request.viewerRole === 'Client' ? 'the venue owner' : request.clientName
+
+  const confirmCopy = {
+    accept: {
+      title: 'Confirm This Booking',
+      message: `Are you sure you want to book ${request.venueName} for ${counterpartLabel} on ${formatDate(request.eventDate)} at ${formatPrice(request.currentPrice)}? This will lock in the date.`,
+      confirmLabel: 'Yes, Confirm Booking',
+      variant: 'primary',
+    },
+    reject: {
+      title: 'Confirm Rejection',
+      message: `Are you sure you want to reject this request from ${counterpartLabel}? They'll see your reason and won't be able to continue this negotiation.`,
+      confirmLabel: 'Yes, Reject It',
+      variant: 'danger',
+    },
+  }[confirmMode] || {}
+
+  const handleConfirm = () => {
+    if (confirmMode === 'accept') {
+      onRespond('Accept', {})
+    } else if (confirmMode === 'reject') {
+      onRespond('Reject', { note: rejectReason.trim() })
+    }
+    setConfirmMode(null)
   }
 
   return (
@@ -174,7 +197,7 @@ function NegotiationDetail({ request, venueHref, onRespond, responding, respondE
                 fullWidth={false}
                 className="px-5"
                 disabled={responding}
-                onClick={() => onRespond('Accept', {})}
+                onClick={() => setConfirmMode('accept')}
               >
                 <Icon name="check_circle" className="text-[16px]" /> Accept
               </Button>
@@ -256,15 +279,26 @@ function NegotiationDetail({ request, venueHref, onRespond, responding, respondE
                   fullWidth={false}
                   className="px-5"
                   disabled={responding || !rejectReason.trim()}
-                  onClick={submitReject}
+                  onClick={() => setConfirmMode('reject')}
                 >
-                  {responding ? 'Sending…' : 'Confirm Reject'}
+                  Reject Request
                 </Button>
               </div>
             </div>
           )}
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmMode !== null}
+        title={confirmCopy.title}
+        message={confirmCopy.message}
+        confirmLabel={confirmCopy.confirmLabel}
+        variant={confirmCopy.variant}
+        loading={responding}
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmMode(null)}
+      />
     </div>
   )
 }

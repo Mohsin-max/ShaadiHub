@@ -10,9 +10,10 @@ import ProviderCard from '../components/ui/ProviderCard'
 import PriceSummaryCard from '../components/ui/PriceSummaryCard'
 import OwnerActionCard from '../components/ui/OwnerActionCard'
 import BookingRequestModal from '../components/ui/BookingRequestModal'
+import PhoneNumberModal from '../components/ui/PhoneNumberModal'
 import VenueDetailSkeleton from '../components/ui/VenueDetailSkeleton'
 import { useAuth } from '../context/AuthContext'
-import { getVenue, getBookedDates } from '../utils/api'
+import { getVenue, getBookedDates, listMyBookingRequests } from '../utils/api'
 
 const CATERING_LABELS = {
   Internal: 'Provided by Venue',
@@ -37,9 +38,13 @@ function formatPrice(value) {
   return `Rs. ${Number(value).toLocaleString('en-PK')}`
 }
 
+function formatDate(value) {
+  return new Date(value).toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
 function VenueDetailPage() {
   const { id } = useParams()
-  const { user } = useAuth()
+  const { user, updatePhone } = useAuth()
   const navigate = useNavigate()
   const [venue, setVenue] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -48,6 +53,9 @@ function VenueDetailPage() {
   const [specialEntrySelected, setSpecialEntrySelected] = useState(false)
   const [bookedDates, setBookedDates] = useState([])
   const [selectedDate, setSelectedDate] = useState(null)
+  const [phoneModalOpen, setPhoneModalOpen] = useState(false)
+  const [pendingDate, setPendingDate] = useState(null)
+  const [myBookedRequest, setMyBookedRequest] = useState(null)
 
   useEffect(() => {
     setLoading(true)
@@ -61,12 +69,32 @@ function VenueDetailPage() {
       .catch(() => {})
   }, [id])
 
+  useEffect(() => {
+    if (user?.role !== 'Client') {
+      setMyBookedRequest(null)
+      return
+    }
+    listMyBookingRequests(user.token)
+      .then((requests) => {
+        const found = requests.find((r) => r.venueId === Number(id) && r.status === 'Booked')
+        setMyBookedRequest(found || null)
+      })
+      .catch(() => {})
+  }, [id, user?.token, user?.role])
+
+  const needsPhone = user?.role === 'Client' && !user?.phone
+
   const handleSelectDate = (dateStr) => {
-    setSelectedDate(dateStr)
     if (!user) {
       navigate('/login')
       return
     }
+    if (needsPhone) {
+      setPendingDate(dateStr)
+      setPhoneModalOpen(true)
+      return
+    }
+    setSelectedDate(dateStr)
     setModalOpen(true)
   }
 
@@ -74,6 +102,20 @@ function VenueDetailPage() {
     if (!user) {
       navigate('/login')
       return
+    }
+    if (needsPhone) {
+      setPhoneModalOpen(true)
+      return
+    }
+    setModalOpen(true)
+  }
+
+  const handlePhoneSubmit = async (phone) => {
+    await updatePhone(phone)
+    setPhoneModalOpen(false)
+    if (pendingDate) {
+      setSelectedDate(pendingDate)
+      setPendingDate(null)
     }
     setModalOpen(true)
   }
@@ -130,6 +172,21 @@ function VenueDetailPage() {
             <div className="flex items-center gap-2 text-[12px] font-semibold text-antique-gold bg-antique-gold/10 border border-antique-gold/30 rounded-lg px-3.5 py-2 mb-4">
               <Icon name="visibility" className="text-[16px]" />
               You're previewing your own listing exactly as clients see it — booking actions are disabled.
+            </div>
+          )}
+
+          {myBookedRequest && (
+            <div className="flex items-center justify-between gap-3 flex-wrap text-[12px] font-semibold text-primary bg-antique-gold/10 border border-antique-gold/30 rounded-lg px-3.5 py-2.5 mb-4">
+              <span className="flex items-center gap-2">
+                <Icon name="event_available" className="text-[16px] text-antique-gold" />
+                You have this venue booked for {formatDate(myBookedRequest.eventDate)}.
+              </span>
+              <Link
+                to={`/my-requests/${myBookedRequest.id}`}
+                className="underline hover:text-secondary transition-colors"
+              >
+                View Booking Details
+              </Link>
             </div>
           )}
 
@@ -313,6 +370,15 @@ function VenueDetailPage() {
           onSuccess={handleBookingSuccess}
         />
       )}
+
+      <PhoneNumberModal
+        open={phoneModalOpen}
+        onClose={() => {
+          setPhoneModalOpen(false)
+          setPendingDate(null)
+        }}
+        onSubmit={handlePhoneSubmit}
+      />
     </div>
   )
 }

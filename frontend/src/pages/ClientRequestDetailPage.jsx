@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import ClientHeader from '../components/layout/ClientHeader'
 import PageFooter from '../components/layout/PageFooter'
 import NegotiationDetail from '../components/ui/NegotiationDetail'
+import BookingSuccessModal from '../components/ui/BookingSuccessModal'
 import Icon from '../components/ui/Icon'
 import { useAuth } from '../context/AuthContext'
 import { getBookingRequest, respondBookingRequest } from '../utils/api'
@@ -23,6 +24,7 @@ function ClientRequestDetailPage() {
   const [error, setError] = useState('')
   const [responding, setResponding] = useState(false)
   const [respondError, setRespondError] = useState('')
+  const [showSuccess, setShowSuccess] = useState(false)
 
   useEffect(() => {
     getBookingRequest(id, user?.token)
@@ -37,6 +39,9 @@ function ClientRequestDetailPage() {
     try {
       const updated = await respondBookingRequest(id, { action, ...payload }, user?.token)
       setRequest(updated)
+      if (action === 'Accept' && updated.status === 'Booked') {
+        setShowSuccess(true)
+      }
     } catch (err) {
       setRespondError(err.message)
     } finally {
@@ -85,6 +90,8 @@ function ClientRequestDetailPage() {
       </main>
 
       <PageFooter links={FOOTER_LINKS} />
+
+      <BookingSuccessModal open={showSuccess} request={request} onClose={() => setShowSuccess(false)} />
     </div>
   )
 }
