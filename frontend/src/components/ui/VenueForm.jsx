@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import FormField from './FormField'
 import SelectField from './SelectField'
@@ -9,6 +9,7 @@ import ErrorBanner from './ErrorBanner'
 import VenueProgressSidebar from './VenueProgressSidebar'
 import PageFooter from '../layout/PageFooter'
 import { VENUE_TYPES, PAKISTANI_CITIES, detectCityFromText } from '../../utils/venueOptions'
+import { listVenues } from '../../utils/api'
 
 const FOOTER_LINKS = [
   { label: 'About Us', href: '#' },
@@ -60,6 +61,47 @@ function VenueForm({
   const [cityAutoDetected, setCityAutoDetected] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const [areaSuggestions, setAreaSuggestions] = useState([])
+  const [areaDropdownOpen, setAreaDropdownOpen] = useState(false)
+  const areaFieldRef = useRef(null)
+
+  useEffect(() => {
+    if (!form.city) {
+      setAreaSuggestions([])
+      return
+    }
+    let cancelled = false
+    listVenues({ city: [form.city] })
+      .then((venues) => {
+        if (cancelled) return
+        setAreaSuggestions([...new Set(venues.map((v) => v.areaName))].sort())
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [form.city])
+
+  useEffect(() => {
+    if (!areaDropdownOpen) return
+    const handleClickOutside = (e) => {
+      if (areaFieldRef.current && !areaFieldRef.current.contains(e.target)) {
+        setAreaDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [areaDropdownOpen])
+
+  const filteredAreaSuggestions = areaSuggestions.filter((a) =>
+    a.toLowerCase().includes(form.areaName.trim().toLowerCase()),
+  )
+
+  const selectAreaSuggestion = (area) => {
+    setForm((prev) => ({ ...prev, areaName: area }))
+    setAreaDropdownOpen(false)
+  }
 
   const sectionsComplete = [
     Boolean(form.name && form.type && form.capacity),
@@ -198,14 +240,32 @@ function VenueForm({
                   onChange={updateField('googleMapsLink')}
                   onBlur={handleMapsLinkBlur}
                 />
-                <FormField
-                  label="Area Name"
-                  type="text"
-                  placeholder="e.g. Gulberg, Nazimabad, DHA Phase 6"
-                  required
-                  value={form.areaName}
-                  onChange={updateField('areaName')}
-                />
+                <div className="relative" ref={areaFieldRef}>
+                  <FormField
+                    label="Area Name"
+                    type="text"
+                    placeholder="e.g. Gulberg, Nazimabad, DHA Phase 6"
+                    required
+                    autoComplete="off"
+                    value={form.areaName}
+                    onChange={updateField('areaName')}
+                    onFocus={() => setAreaDropdownOpen(true)}
+                  />
+                  {areaDropdownOpen && filteredAreaSuggestions.length > 0 && (
+                    <div className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-outline-variant rounded-lg shadow-lg py-1">
+                      {filteredAreaSuggestions.map((area) => (
+                        <button
+                          key={area}
+                          type="button"
+                          onClick={() => selectAreaSuggestion(area)}
+                          className="w-full text-left px-3.5 py-2 text-[13px] text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
+                        >
+                          {area}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div>
                   <SelectField
                     label="City"
