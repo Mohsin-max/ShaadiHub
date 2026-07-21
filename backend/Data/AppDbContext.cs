@@ -14,6 +14,8 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Venue> Venues => Set<Venue>();
     public DbSet<VenueImage> VenueImages => Set<VenueImage>();
+    public DbSet<BookingRequest> BookingRequests => Set<BookingRequest>();
+    public DbSet<BookingOffer> BookingOffers => Set<BookingOffer>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +58,36 @@ public class AppDbContext : DbContext
             entity.HasOne(i => i.Venue)
                 .WithMany(v => v.Images)
                 .HasForeignKey(i => i.VenueId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<BookingRequest>(entity =>
+        {
+            entity.Property(b => b.Status).HasConversion<string>().HasMaxLength(20);
+            entity.Property(b => b.Turn).HasConversion<string>().HasMaxLength(10);
+            entity.Property(b => b.ListedPriceSnapshot).HasColumnType("decimal(12,2)");
+
+            entity.HasOne(b => b.Venue)
+                .WithMany()
+                .HasForeignKey(b => b.VenueId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(b => b.Client)
+                .WithMany()
+                .HasForeignKey(b => b.ClientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(b => new { b.VenueId, b.EventDate });
+        });
+
+        modelBuilder.Entity<BookingOffer>(entity =>
+        {
+            entity.Property(o => o.OfferedBy).HasConversion<string>().HasMaxLength(10);
+            entity.Property(o => o.Price).HasColumnType("decimal(12,2)");
+
+            entity.HasOne(o => o.BookingRequest)
+                .WithMany(b => b.Offers)
+                .HasForeignKey(o => o.BookingRequestId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

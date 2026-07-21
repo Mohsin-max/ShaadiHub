@@ -1,30 +1,69 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Icon from './Icon'
 import Button from './Button'
 import FormField from './FormField'
+import ErrorBanner from './ErrorBanner'
+import { createBookingRequest } from '../../utils/api'
 
 function todayISO() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function BookingRequestModal({ open, onClose, venueName, initialPrice }) {
+function BookingRequestModal({
+  open,
+  onClose,
+  venueId,
+  venueName,
+  initialPrice,
+  preselectedDate,
+  bookedDates = [],
+  token,
+  onSuccess,
+}) {
   const [selectedDate, setSelectedDate] = useState('')
   const [price, setPrice] = useState('')
   const [note, setNote] = useState('')
   const [priceTouched, setPriceTouched] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (open) {
+      setSelectedDate(preselectedDate || '')
+      setError('')
+    }
+  }, [open, preselectedDate])
 
   if (!open) return null
 
   const displayPrice = priceTouched ? price : initialPrice ? String(initialPrice) : price
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    onClose()
-    setSelectedDate('')
-    setPrice('')
-    setPriceTouched(false)
-    setNote('')
+    if (bookedDates.includes(selectedDate)) {
+      setError('That date is already booked for this venue — please pick another.')
+      return
+    }
+    setError('')
+    setLoading(true)
+    try {
+      const created = await createBookingRequest(
+        venueId,
+        { eventDate: selectedDate, offerPrice: Number(displayPrice), note: note.trim() || null },
+        token,
+      )
+      onClose()
+      setSelectedDate('')
+      setPrice('')
+      setPriceTouched(false)
+      setNote('')
+      onSuccess?.(created)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -49,6 +88,8 @@ function BookingRequestModal({ open, onClose, venueName, initialPrice }) {
               Requesting <span className="font-semibold text-primary">{venueName}</span>
             </p>
           )}
+
+          <ErrorBanner message={error} />
 
           <div className="space-y-1">
             <label className="block font-bold text-[11px] text-primary uppercase tracking-wider">
@@ -75,6 +116,8 @@ function BookingRequestModal({ open, onClose, venueName, initialPrice }) {
             prefix="Rs."
             type="number"
             placeholder="e.g. 450,000"
+            required
+            min={0}
             value={displayPrice}
             onChange={(e) => {
               setPriceTouched(true)
@@ -99,8 +142,8 @@ function BookingRequestModal({ open, onClose, venueName, initialPrice }) {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary">
-              Submit Request
+            <Button type="submit" variant="primary" disabled={loading}>
+              {loading ? 'Sending…' : 'Submit Request'}
             </Button>
           </div>
 

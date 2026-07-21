@@ -25,6 +25,7 @@ function SignupPage() {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
     password: '',
   })
   const [providerForm, setProviderForm] = useState({
@@ -153,6 +154,14 @@ function SignupPage() {
               required
               value={clientForm.email}
               onChange={updateClientField('email')}
+            />
+            <FormField
+              label="Phone Number"
+              type="tel"
+              placeholder="03XX-XXXXXXX"
+              required
+              value={clientForm.phone}
+              onChange={updateClientField('phone')}
             />
             <FormField
               label="Password"

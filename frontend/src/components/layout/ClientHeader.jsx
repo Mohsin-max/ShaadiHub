@@ -3,7 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import Icon from '../ui/Icon'
 import { useAuth } from '../../context/AuthContext'
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
   { label: 'Browse Venues', to: '/venues' },
   { label: 'Favorites', to: '/favorites' },
 ]
@@ -29,6 +29,11 @@ function ClientHeader({ searchValue, onSearchChange }) {
     navigate('/login')
   }
 
+  const navItems =
+    user?.role === 'Client'
+      ? [...BASE_NAV_ITEMS, { label: 'My Requests', to: '/my-requests' }]
+      : BASE_NAV_ITEMS
+
   return (
     <header className="fixed top-0 w-full z-50 flex justify-between items-center px-5 md:px-6 h-14 bg-background/95 backdrop-blur-md border-b border-outline-variant shadow-sm">
       <div className="flex items-center gap-8">
@@ -36,7 +41,7 @@ function ClientHeader({ searchValue, onSearchChange }) {
           ShaadiHub
         </Link>
         <nav className="hidden md:flex gap-5">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <NavLink
               key={item.label}
               to={item.to}

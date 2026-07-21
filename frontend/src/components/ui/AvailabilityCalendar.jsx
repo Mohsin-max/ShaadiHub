@@ -11,6 +11,13 @@ function startOfDay(date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }
 
+function toISODate(date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 function buildMonthGrid(year, month) {
   const firstOfMonth = new Date(year, month, 1)
   const startWeekday = (firstOfMonth.getDay() + 6) % 7
@@ -34,19 +41,20 @@ function buildMonthGrid(year, month) {
 
 const CELL_STYLES = {
   available: 'bg-white border border-outline-variant text-on-surface',
+  'available-selectable':
+    'bg-white border border-outline-variant text-on-surface hover:border-antique-gold hover:bg-antique-gold/10 hover:text-primary cursor-pointer transition-colors',
+  selected: 'bg-antique-gold border-antique-gold text-primary font-bold ring-2 ring-antique-gold/40',
   booked: 'bg-primary border border-primary text-on-primary font-semibold',
   past: 'bg-surface-container-low border border-outline-variant/30 text-on-surface-variant/40',
   outside: 'bg-transparent text-on-surface-variant/20',
 }
 
-function AvailabilityCalendar({ bookedDays = [] }) {
+function AvailabilityCalendar({ bookedDates = [], selectable = false, selectedDate = null, onSelectDate }) {
   const today = startOfDay(new Date())
   const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1)
   const [viewDate, setViewDate] = useState(currentMonthStart)
 
   const isAtCurrentMonth = viewDate.getTime() === currentMonthStart.getTime()
-  const isViewingActualCurrentMonth =
-    viewDate.getFullYear() === today.getFullYear() && viewDate.getMonth() === today.getMonth()
 
   const cells = buildMonthGrid(viewDate.getFullYear(), viewDate.getMonth())
 
@@ -61,8 +69,10 @@ function AvailabilityCalendar({ bookedDays = [] }) {
   const cellState = (cell) => {
     if (!cell.inMonth) return 'outside'
     if (cell.date < today) return 'past'
-    if (isViewingActualCurrentMonth && bookedDays.includes(cell.day)) return 'booked'
-    return 'available'
+    const iso = toISODate(cell.date)
+    if (bookedDates.includes(iso)) return 'booked'
+    if (selectedDate === iso) return 'selected'
+    return selectable ? 'available-selectable' : 'available'
   }
 
   return (
@@ -100,14 +110,27 @@ function AvailabilityCalendar({ bookedDays = [] }) {
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1.5 mb-5">
-          {cells.map((cell, i) => (
-            <div
-              key={i}
-              className={`h-9 rounded-md flex items-center justify-center text-[12px] ${CELL_STYLES[cellState(cell)]}`}
-            >
-              {cell.day}
-            </div>
-          ))}
+          {cells.map((cell, i) => {
+            const state = cellState(cell)
+            const className = `h-9 rounded-md flex items-center justify-center text-[12px] ${CELL_STYLES[state]}`
+            if (state === 'available-selectable') {
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => onSelectDate?.(toISODate(cell.date))}
+                  className={className}
+                >
+                  {cell.day}
+                </button>
+              )
+            }
+            return (
+              <div key={i} className={className}>
+                {cell.day}
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -124,6 +147,12 @@ function AvailabilityCalendar({ bookedDays = [] }) {
           <div className="w-3.5 h-3.5 rounded bg-surface-container-low border border-outline-variant/30" />
           <span className="text-[12px] text-on-surface-variant">Past</span>
         </div>
+        {selectable && (
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded bg-antique-gold" />
+            <span className="text-[12px] text-on-surface-variant">Selected</span>
+          </div>
+        )}
       </div>
     </section>
   )

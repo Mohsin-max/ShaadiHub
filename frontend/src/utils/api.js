@@ -62,3 +62,35 @@ export function listMyVenues(token) {
 export function updateVenue(id, formData, token) {
   return request(`/venues/${id}`, { method: 'PUT', body: formData, headers: authHeaders(token) })
 }
+
+export function getBookedDates(venueId) {
+  return request(`/venues/${venueId}/booked-dates`)
+}
+
+export function createBookingRequest(venueId, payload, token) {
+  return request(`/venues/${venueId}/booking-requests`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: authHeaders(token),
+  })
+}
+
+export function listMyBookingRequests(token) {
+  return request('/booking-requests/mine', { headers: authHeaders(token) })
+}
+
+export function listReceivedBookingRequests(token) {
+  return request('/booking-requests/received', { headers: authHeaders(token) })
+}
+
+export function getBookingRequest(id, token) {
+  return request(`/booking-requests/${id}`, { headers: authHeaders(token) })
+}
+
+export function respondBookingRequest(id, payload, token) {
+  return request(`/booking-requests/${id}/respond`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: authHeaders(token),
+  })
+}

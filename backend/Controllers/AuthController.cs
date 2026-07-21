@@ -37,6 +37,7 @@ public class AuthController : ControllerBase
             PasswordHash = _authService.HashPassword(request.Password),
             FirstName = request.FirstName.Trim(),
             LastName = request.LastName.Trim(),
+            Phone = request.Phone.Trim(),
         };
 
         _context.Users.Add(user);

@@ -4,6 +4,7 @@ const VARIANTS = {
   gold: 'bg-antique-gold text-primary hover:brightness-105',
   outline:
     'bg-white border border-outline-variant text-primary hover:bg-surface-container',
+  danger: 'bg-error text-on-error hover:brightness-105',
 }
 
 function Button({ variant = 'primary', fullWidth = true, className = '', children, ...rest }) {

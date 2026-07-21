@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import ClientHeader from '../components/layout/ClientHeader'
 import PageFooter from '../components/layout/PageFooter'
 import Icon from '../components/ui/Icon'
@@ -12,7 +12,7 @@ import OwnerActionCard from '../components/ui/OwnerActionCard'
 import BookingRequestModal from '../components/ui/BookingRequestModal'
 import VenueDetailSkeleton from '../components/ui/VenueDetailSkeleton'
 import { useAuth } from '../context/AuthContext'
-import { getVenue } from '../utils/api'
+import { getVenue, getBookedDates } from '../utils/api'
 
 const CATERING_LABELS = {
   Internal: 'Provided by Venue',
@@ -40,11 +40,14 @@ function formatPrice(value) {
 function VenueDetailPage() {
   const { id } = useParams()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [venue, setVenue] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [specialEntrySelected, setSpecialEntrySelected] = useState(false)
+  const [bookedDates, setBookedDates] = useState([])
+  const [selectedDate, setSelectedDate] = useState(null)
 
   useEffect(() => {
     setLoading(true)
@@ -53,7 +56,31 @@ function VenueDetailPage() {
       .then(setVenue)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
+    getBookedDates(id)
+      .then(setBookedDates)
+      .catch(() => {})
   }, [id])
+
+  const handleSelectDate = (dateStr) => {
+    setSelectedDate(dateStr)
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    setModalOpen(true)
+  }
+
+  const handleSendRequest = () => {
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    setModalOpen(true)
+  }
+
+  const handleBookingSuccess = (created) => {
+    navigate(`/my-requests/${created.id}`)
+  }
 
   if (loading) {
     return (
@@ -241,7 +268,12 @@ function VenueDetailPage() {
                 </div>
               </div>
 
-              <AvailabilityCalendar bookedDays={[8, 15, 22]} />
+              <AvailabilityCalendar
+                bookedDates={bookedDates}
+                selectable={!isOwner}
+                selectedDate={selectedDate}
+                onSelectDate={handleSelectDate}
+              />
             </div>
 
             {/* Right Sidebar */}
@@ -258,7 +290,7 @@ function VenueDetailPage() {
                   name={venue.ownerName}
                   role="Venue Owner"
                   photo={null}
-                  onSendRequest={() => setModalOpen(true)}
+                  onSendRequest={handleSendRequest}
                 />
               )}
             </div>
@@ -272,8 +304,13 @@ function VenueDetailPage() {
         <BookingRequestModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
+          venueId={venue.id}
           venueName={venue.name}
           initialPrice={venue.price + (specialEntrySelected ? Number(venue.specialEntryPrice || 0) : 0)}
+          preselectedDate={selectedDate}
+          bookedDates={bookedDates}
+          token={user?.token}
+          onSuccess={handleBookingSuccess}
         />
       )}
     </div>
