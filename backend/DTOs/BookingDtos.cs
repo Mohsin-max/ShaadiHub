@@ -51,6 +51,7 @@ public class BookingRequestResponse
     public string VenueAreaName { get; set; } = string.Empty;
 
     public string ClientName { get; set; } = string.Empty;
+    public string OwnerName { get; set; } = string.Empty;
 
     public DateOnly EventDate { get; set; }
     public decimal ListedPriceSnapshot { get; set; }

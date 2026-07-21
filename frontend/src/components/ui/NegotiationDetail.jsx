@@ -43,18 +43,30 @@ function NegotiationDetail({ request, venueHref, onRespond, responding, respondE
     onRespond('Counter', { price: Number(counterPrice), note: counterNote.trim() || null })
   }
 
-  const counterpartLabel = request.viewerRole === 'Client' ? 'the venue owner' : request.clientName
+  const counterpartLabel = request.viewerRole === 'Client' ? request.ownerName : request.clientName
+  const counterpartRoleLabel = request.viewerRole === 'Client' ? 'Venue Owner' : 'Client'
 
   const confirmCopy = {
     accept: {
       title: 'Confirm This Booking',
-      message: `Are you sure you want to book ${request.venueName} for ${counterpartLabel} on ${formatDate(request.eventDate)} at ${formatPrice(request.currentPrice)}? This will lock in the date.`,
+      details: [
+        { label: 'Venue', value: request.venueName, wide: true },
+        { label: counterpartRoleLabel, value: counterpartLabel },
+        { label: 'Event Date', value: formatDate(request.eventDate) },
+        { label: 'Amount', value: formatPrice(request.currentPrice) },
+      ],
+      message: 'Do you want to accept and confirm this booking? This will lock in the date.',
       confirmLabel: 'Yes, Confirm Booking',
       variant: 'primary',
     },
     reject: {
       title: 'Confirm Rejection',
-      message: `Are you sure you want to reject this request from ${counterpartLabel}? They'll see your reason and won't be able to continue this negotiation.`,
+      details: [
+        { label: 'Venue', value: request.venueName, wide: true },
+        { label: counterpartRoleLabel, value: counterpartLabel },
+        { label: 'Event Date', value: formatDate(request.eventDate) },
+      ],
+      message: 'Do you want to reject this request? They will see your reason and this negotiation will end.',
       confirmLabel: 'Yes, Reject It',
       variant: 'danger',
     },
@@ -292,6 +304,7 @@ function NegotiationDetail({ request, venueHref, onRespond, responding, respondE
       <ConfirmModal
         open={confirmMode !== null}
         title={confirmCopy.title}
+        details={confirmCopy.details}
         message={confirmCopy.message}
         confirmLabel={confirmCopy.confirmLabel}
         variant={confirmCopy.variant}

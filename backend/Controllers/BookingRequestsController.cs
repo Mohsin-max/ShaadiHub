@@ -252,6 +252,7 @@ public class BookingRequestsController : ControllerBase
             VenueCity = request.Venue.City,
             VenueAreaName = request.Venue.AreaName,
             ClientName = $"{request.Client.FirstName} {request.Client.LastName}".Trim(),
+            OwnerName = request.Venue.Owner.Name ?? string.Empty,
             EventDate = request.EventDate,
             ListedPriceSnapshot = request.ListedPriceSnapshot,
             CurrentPrice = latestOffer.Price,
