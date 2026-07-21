@@ -10,6 +10,8 @@ const NAV_ITEMS = [
   { icon: 'settings', label: 'Settings', to: '#' },
 ]
 
+const BROWSE_ITEM = { icon: 'travel_explore', label: 'Browse Venues', to: '/venues' }
+
 const PROFILE_IMAGE =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuAN7Oa5EjnIP4Bq91N9yq18t9hKJqAk6ycgf5lgXTlsNxoA-u3JXaSiU_OIWlrgSfA9vBGNLNMR_XKkOpHM856Xf95SPkeUkhVP2jQLu16_obAE2LesXWMay8wuxquO_hz86iqI3DdhneXjcAiNRr7gU9RseftTMC0Zdt7q6d349c1umA7qfmHLQfJMH803mhko4DL2tURjcsXyqhyigYKp0ae9xHpXGAj86HuOdrdrabC-_bOULnttNsQ4PxjIQ3IsjbtCUqoo6KQ'
 
@@ -72,6 +74,13 @@ function ProviderSidebar({ activeLabel = 'Dashboard' }) {
         >
           <Icon name="add" className="text-[16px]" />
           Add New Venue
+        </Link>
+        <Link
+          to={BROWSE_ITEM.to}
+          className="w-full py-2 px-3 border border-on-primary/20 text-on-primary rounded-lg font-bold text-xs uppercase tracking-wide hover:bg-primary-container transition-all flex items-center justify-center gap-1.5"
+        >
+          <Icon name={BROWSE_ITEM.icon} className="text-[16px]" />
+          {BROWSE_ITEM.label}
         </Link>
         <div className="pt-2 border-t border-on-primary/10">
           <a

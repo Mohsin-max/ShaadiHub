@@ -71,6 +71,16 @@ function ClientHeader({ searchValue, onSearchChange }) {
       </div>
 
       <div className="flex items-center gap-3">
+        {user?.role === 'VenueOwner' && (
+          <Link
+            to="/provider/dashboard"
+            className="hidden sm:flex items-center gap-1.5 text-[12px] font-semibold text-primary border border-outline-variant rounded-full px-3 py-1.5 hover:border-antique-gold/50 hover:bg-surface-container-low transition-colors"
+          >
+            <Icon name="dashboard" className="text-[15px]" />
+            Dashboard
+          </Link>
+        )}
+
         <button className="p-1.5 text-on-surface-variant hover:text-primary transition-colors">
           <Icon name="notifications" className="text-[20px]" />
         </button>

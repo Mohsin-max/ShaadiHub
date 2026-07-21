@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import ClientHeader from '../components/layout/ClientHeader'
 import PageFooter from '../components/layout/PageFooter'
 import Icon from '../components/ui/Icon'
@@ -8,8 +8,10 @@ import AmenitiesGrid from '../components/ui/AmenitiesGrid'
 import AvailabilityCalendar from '../components/ui/AvailabilityCalendar'
 import ProviderCard from '../components/ui/ProviderCard'
 import PriceSummaryCard from '../components/ui/PriceSummaryCard'
+import OwnerActionCard from '../components/ui/OwnerActionCard'
 import BookingRequestModal from '../components/ui/BookingRequestModal'
 import VenueDetailSkeleton from '../components/ui/VenueDetailSkeleton'
+import { useAuth } from '../context/AuthContext'
 import { getVenue } from '../utils/api'
 
 const CATERING_LABELS = {
@@ -37,6 +39,7 @@ function formatPrice(value) {
 
 function VenueDetailPage() {
   const { id } = useParams()
+  const { user } = useAuth()
   const [venue, setVenue] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -75,6 +78,8 @@ function VenueDetailPage() {
     )
   }
 
+  const isOwner = user?.role === 'VenueOwner' && user?.id === venue.ownerId
+
   const galleryImages = venue.images.length > 0 ? venue.images.map((i) => i.url) : [PLACEHOLDER_IMAGE]
 
   const stats = [
@@ -94,6 +99,13 @@ function VenueDetailPage() {
 
       <main className="pt-14 flex-1">
         <div className="max-w-[1280px] mx-auto px-5 md:px-6 pt-8 pb-16">
+          {isOwner && (
+            <div className="flex items-center gap-2 text-[12px] font-semibold text-antique-gold bg-antique-gold/10 border border-antique-gold/30 rounded-lg px-3.5 py-2 mb-4">
+              <Icon name="visibility" className="text-[16px]" />
+              You're previewing your own listing exactly as clients see it — booking actions are disabled.
+            </div>
+          )}
+
           {/* Header Info */}
           <div className="relative overflow-hidden rounded-2xl mb-6 bg-gradient-to-br from-primary/[0.05] via-transparent to-antique-gold/[0.08] border border-outline-variant/60 px-5 md:px-7 py-6">
             <div className="absolute -top-20 -right-16 w-64 h-64 rounded-full bg-antique-gold/10 blur-3xl pointer-events-none" />
@@ -123,9 +135,18 @@ function VenueDetailPage() {
                 </div>
               </div>
               <div className="flex gap-2.5">
-                <button className="flex items-center gap-1.5 px-3.5 py-2 border border-outline-variant rounded-lg text-[13px] font-semibold bg-surface-container-lowest hover:border-antique-gold/50 hover:text-primary transition-colors">
-                  <Icon name="favorite" className="text-[16px]" /> Save
-                </button>
+                {isOwner ? (
+                  <Link
+                    to={`/provider/venues/${venue.id}/edit`}
+                    className="flex items-center gap-1.5 px-3.5 py-2 bg-antique-gold text-primary rounded-lg text-[13px] font-bold hover:brightness-105 transition-all"
+                  >
+                    <Icon name="edit" className="text-[16px]" /> Edit Venue
+                  </Link>
+                ) : (
+                  <button className="flex items-center gap-1.5 px-3.5 py-2 border border-outline-variant rounded-lg text-[13px] font-semibold bg-surface-container-lowest hover:border-antique-gold/50 hover:text-primary transition-colors">
+                    <Icon name="favorite" className="text-[16px]" /> Save
+                  </button>
+                )}
                 <button className="flex items-center gap-1.5 px-3.5 py-2 border border-outline-variant rounded-lg text-[13px] font-semibold bg-surface-container-lowest hover:border-antique-gold/50 hover:text-primary transition-colors">
                   <Icon name="share" className="text-[16px]" /> Share
                 </button>
@@ -230,12 +251,16 @@ function VenueDetailPage() {
                 specialEntrySelected={specialEntrySelected}
                 onToggleSpecialEntry={setSpecialEntrySelected}
               />
-              <ProviderCard
-                name={venue.ownerName}
-                role="Venue Owner"
-                photo={null}
-                onSendRequest={() => setModalOpen(true)}
-              />
+              {isOwner ? (
+                <OwnerActionCard venueId={venue.id} />
+              ) : (
+                <ProviderCard
+                  name={venue.ownerName}
+                  role="Venue Owner"
+                  photo={null}
+                  onSendRequest={() => setModalOpen(true)}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -243,12 +268,14 @@ function VenueDetailPage() {
 
       <PageFooter links={FOOTER_LINKS} />
 
-      <BookingRequestModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        venueName={venue.name}
-        initialPrice={venue.price + (specialEntrySelected ? Number(venue.specialEntryPrice || 0) : 0)}
-      />
+      {!isOwner && (
+        <BookingRequestModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          venueName={venue.name}
+          initialPrice={venue.price + (specialEntrySelected ? Number(venue.specialEntryPrice || 0) : 0)}
+        />
+      )}
     </div>
   )
 }

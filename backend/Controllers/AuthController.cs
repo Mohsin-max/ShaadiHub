@@ -92,6 +92,7 @@ public class AuthController : ControllerBase
 
         return new AuthResponse
         {
+            Id = user.Id,
             Token = _authService.GenerateToken(user),
             Role = user.Role.ToString(),
             DisplayName = displayName,
