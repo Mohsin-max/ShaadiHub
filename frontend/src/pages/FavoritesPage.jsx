@@ -24,7 +24,7 @@ function FavoritesPage() {
       <main className="pt-14 flex-1 flex">
         <FilterSidebar />
 
-        <section className="flex-1 ml-0 md:ml-64 p-5 md:p-6">
+        <section className="flex-1 ml-0 md:ml-[282px] p-5 md:p-6">
           <div className="mb-5">
             <h1 className="font-headline-md text-[24px] text-primary mb-0.5">Your Favorites</h1>
             <p className="text-[13px] text-on-surface-variant">
@@ -49,7 +49,7 @@ function FavoritesPage() {
         </section>
       </main>
 
-      <div className="md:pl-64">
+      <div className="md:pl-[282px]">
         <PageFooter links={FOOTER_LINKS} social />
       </div>
     </div>

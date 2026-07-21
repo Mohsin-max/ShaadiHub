@@ -8,6 +8,7 @@ import AmenitiesGrid from '../components/ui/AmenitiesGrid'
 import AvailabilityCalendar from '../components/ui/AvailabilityCalendar'
 import ProviderCard from '../components/ui/ProviderCard'
 import BookingRequestModal from '../components/ui/BookingRequestModal'
+import VenueDetailSkeleton from '../components/ui/VenueDetailSkeleton'
 import { getVenue } from '../utils/api'
 
 const FOOTER_LINKS = [
@@ -47,9 +48,9 @@ function VenueDetailPage() {
     return (
       <div className="bg-background min-h-screen flex flex-col">
         <ClientHeader />
-        <div className="pt-14 flex-1 flex items-center justify-center text-on-surface-variant">
-          Loading venue…
-        </div>
+        <main className="pt-14 flex-1">
+          <VenueDetailSkeleton />
+        </main>
       </div>
     )
   }
@@ -69,10 +70,14 @@ function VenueDetailPage() {
   const galleryImages = venue.images.length > 0 ? venue.images.map((i) => i.url) : [PLACEHOLDER_IMAGE]
 
   const stats = [
-    { label: 'Capacity', value: `${venue.capacity} Guests` },
-    { label: 'Venue Type', value: venue.type },
-    { label: 'Price', value: formatPrice(venue.price) },
-    { label: 'Weekend Price', value: venue.weekendPrice ? formatPrice(venue.weekendPrice) : 'Same as base' },
+    { label: 'Capacity', value: `${venue.capacity} Guests`, icon: 'group' },
+    { label: 'Venue Type', value: venue.type, icon: 'category' },
+    { label: 'Price', value: formatPrice(venue.price), icon: 'payments' },
+    {
+      label: 'Weekend Price',
+      value: venue.weekendPrice ? formatPrice(venue.weekendPrice) : 'Same as base',
+      icon: 'weekend',
+    },
   ]
 
   return (
@@ -82,10 +87,13 @@ function VenueDetailPage() {
       <main className="pt-14 flex-1">
         <div className="max-w-[1280px] mx-auto px-5 md:px-6 pt-8 pb-16">
           {/* Header Info */}
-          <div className="mb-6">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="relative overflow-hidden rounded-2xl mb-6 bg-gradient-to-br from-primary/[0.05] via-transparent to-antique-gold/[0.08] border border-outline-variant/60 px-5 md:px-7 py-6">
+            <div className="absolute -top-20 -right-16 w-64 h-64 rounded-full bg-antique-gold/10 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-12 w-56 h-56 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+            <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
-                <span className="inline-block px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-semibold mb-2.5">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-semibold mb-2.5 ring-1 ring-antique-gold/30">
+                  <Icon name="verified" className="text-[13px]" />
                   {venue.type}
                 </span>
                 <h1 className="font-headline-lg text-[28px] text-primary mb-1.5">{venue.name}</h1>
@@ -107,10 +115,10 @@ function VenueDetailPage() {
                 </div>
               </div>
               <div className="flex gap-2.5">
-                <button className="flex items-center gap-1.5 px-3.5 py-2 border border-outline-variant rounded-lg text-[13px] font-semibold hover:bg-surface-container-low transition-colors">
+                <button className="flex items-center gap-1.5 px-3.5 py-2 border border-outline-variant rounded-lg text-[13px] font-semibold bg-surface-container-lowest hover:border-antique-gold/50 hover:text-primary transition-colors">
                   <Icon name="favorite" className="text-[16px]" /> Save
                 </button>
-                <button className="flex items-center gap-1.5 px-3.5 py-2 border border-outline-variant rounded-lg text-[13px] font-semibold hover:bg-surface-container-low transition-colors">
+                <button className="flex items-center gap-1.5 px-3.5 py-2 border border-outline-variant rounded-lg text-[13px] font-semibold bg-surface-container-lowest hover:border-antique-gold/50 hover:text-primary transition-colors">
                   <Icon name="share" className="text-[16px]" /> Share
                 </button>
               </div>
@@ -123,23 +131,40 @@ function VenueDetailPage() {
             {/* Left Content */}
             <div className="lg:col-span-2 space-y-8">
               <section>
-                <h3 className="font-headline-sm text-[18px] text-primary mb-3">About the Venue</h3>
+                <h3 className="font-headline-sm text-[18px] text-primary mb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 rounded-full bg-antique-gold inline-block" />
+                  About the Venue
+                </h3>
                 <p className="text-on-surface-variant text-[15px] leading-relaxed max-w-3xl">
                   {venue.description || `${venue.name} is a ${venue.type.toLowerCase()} located in ${venue.areaName}, ${venue.city}, with space for up to ${venue.capacity} guests.`}
                 </p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-6 pt-6 border-t border-outline-variant">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
                   {stats.map((stat) => (
-                    <div key={stat.label} className="flex flex-col">
-                      <span className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">
-                        {stat.label}
-                      </span>
-                      <span className="text-[16px] font-bold text-primary">{stat.value}</span>
+                    <div
+                      key={stat.label}
+                      className="flex flex-col gap-2 p-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant hover:border-antique-gold/50 hover:shadow-sm transition-all"
+                    >
+                      <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                        <Icon name={stat.icon} className="text-[16px]" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">
+                          {stat.label}
+                        </p>
+                        <p className="text-[14px] font-bold text-on-surface">{stat.value}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
               </section>
 
-              <AmenitiesGrid amenities={venue.amenities} />
+              <div>
+                <h3 className="font-headline-sm text-[18px] text-primary mb-3 flex items-center gap-2">
+                  <span className="w-1 h-4 rounded-full bg-antique-gold inline-block" />
+                  Amenities
+                </h3>
+                <AmenitiesGrid amenities={venue.amenities} hideHeading />
+              </div>
 
               <AvailabilityCalendar bookedDays={[8, 15, 22]} />
             </div>

@@ -19,9 +19,9 @@ function VenueCard({ venue, showFavorite = true, editHref }) {
       }}
       role="link"
       tabIndex={0}
-      className="group bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className="group bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden hover:shadow-xl hover:shadow-primary/10 hover:border-antique-gold/50 transition-all duration-300 cursor-pointer"
     >
-      <div className="relative h-44 overflow-hidden bg-surface-container">
+      <div className="relative h-56 overflow-hidden bg-surface-container">
         {image ? (
           <img
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -33,7 +33,8 @@ function VenueCard({ venue, showFavorite = true, editHref }) {
             <Icon name="image" className="text-[40px]" />
           </div>
         )}
-        <div className="absolute top-3 left-3 bg-primary text-on-primary text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/55 via-black/10 to-transparent pointer-events-none" />
+        <div className="absolute top-3 left-3 bg-primary text-on-primary text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm ring-1 ring-antique-gold/40">
           {type}
         </div>
         {showFavorite && (
@@ -76,12 +77,17 @@ function VenueCard({ venue, showFavorite = true, editHref }) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[11px] text-on-surface-variant">Starting from</p>
-            <p className="text-[16px] font-bold text-secondary">{formatPrice(price)}</p>
+            <p className="text-[17px] font-bold text-primary">
+              {formatPrice(price)}
+              <span className="text-antique-gold">.</span>
+            </p>
           </div>
-          <Icon
-            name="chevron_right"
-            className="text-on-surface-variant group-hover:text-primary group-hover:translate-x-0.5 transition-all text-[20px]"
-          />
+          <div className="h-8 w-8 rounded-full flex items-center justify-center bg-surface-container group-hover:bg-primary transition-colors">
+            <Icon
+              name="chevron_right"
+              className="text-on-surface-variant group-hover:text-on-primary group-hover:translate-x-0.5 transition-all text-[18px]"
+            />
+          </div>
         </div>
       </div>
     </div>

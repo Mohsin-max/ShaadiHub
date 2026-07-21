@@ -1,22 +1,33 @@
-import SearchableMultiSelect from '../ui/SearchableMultiSelect'
+import SearchableSelect from '../ui/SearchableSelect'
 
 function FilterSidebar({
   cities = [],
   areas = [],
   types = [],
-  selectedCities = [],
+  selectedCity = '',
   selectedAreas = [],
   selectedTypes = [],
-  onCityToggle,
+  capacityMin = 0,
+  budgetMin = '',
+  budgetMax = '',
+  onCityChange,
   onAreaToggle,
   onTypeToggle,
+  onCapacityChange,
+  onBudgetMinChange,
+  onBudgetMaxChange,
   onClearAll,
 }) {
   const hasActiveFilters =
-    selectedCities.length > 0 || selectedAreas.length > 0 || selectedTypes.length > 0
+    Boolean(selectedCity) ||
+    selectedAreas.length > 0 ||
+    selectedTypes.length > 0 ||
+    capacityMin > 0 ||
+    Boolean(budgetMin) ||
+    Boolean(budgetMax)
 
   return (
-    <aside className="hidden md:block w-64 h-[calc(100vh-56px)] fixed left-0 top-14 bg-surface-container-lowest border-r border-outline-variant p-5 overflow-y-auto">
+    <aside className="hidden md:block w-[282px] h-[calc(100vh-56px)] fixed left-0 top-14 bg-surface-container-lowest border-r border-outline-variant p-5 overflow-y-auto">
       <div className="flex items-center justify-between mb-5">
         <h2 className="font-headline-sm text-[16px] text-primary">Filters</h2>
         {hasActiveFilters && (
@@ -38,17 +49,17 @@ function FilterSidebar({
           {cities.length === 0 ? (
             <p className="text-[12px] text-on-surface-variant italic">No venues yet</p>
           ) : (
-            <SearchableMultiSelect
+            <SearchableSelect
               options={cities}
-              selected={selectedCities}
-              onToggle={onCityToggle}
-              placeholder="Search city…"
+              value={selectedCity}
+              onChange={onCityChange}
+              placeholder="Select a city…"
             />
           )}
         </div>
 
-        {/* Neighborhood / Area */}
-        {areas.length > 0 && (
+        {/* Neighborhood / Area — only once a city is chosen, scoped to that city */}
+        {selectedCity && areas.length > 0 && (
           <div>
             <h3 className="font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
               Neighborhood
@@ -103,10 +114,15 @@ function FilterSidebar({
           <div className="space-y-3">
             <input
               type="range"
+              min={0}
+              max={2500}
+              step={25}
+              value={capacityMin}
+              onChange={(e) => onCapacityChange?.(Number(e.target.value))}
               className="w-full accent-primary bg-outline-variant h-1.5 rounded-lg appearance-none cursor-pointer"
             />
             <div className="flex justify-between text-[11px] text-on-surface-variant">
-              <span>200</span>
+              <span>{capacityMin > 0 ? `${capacityMin.toLocaleString()}+ guests` : 'Any capacity'}</span>
               <span className="text-primary font-bold">2,500+</span>
             </div>
           </div>
@@ -125,7 +141,10 @@ function FilterSidebar({
               <input
                 className="w-full pl-8 pr-2 py-2 bg-white border border-outline-variant rounded-lg text-[12px] focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
                 placeholder="Min"
-                type="text"
+                type="number"
+                min={0}
+                value={budgetMin}
+                onChange={(e) => onBudgetMinChange?.(e.target.value)}
               />
             </div>
             <div className="relative">
@@ -135,7 +154,10 @@ function FilterSidebar({
               <input
                 className="w-full pl-8 pr-2 py-2 bg-white border border-outline-variant rounded-lg text-[12px] focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
                 placeholder="Max"
-                type="text"
+                type="number"
+                min={0}
+                value={budgetMax}
+                onChange={(e) => onBudgetMaxChange?.(e.target.value)}
               />
             </div>
           </div>

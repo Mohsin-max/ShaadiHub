@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import Icon from '../ui/Icon'
 import { useAuth } from '../../context/AuthContext'
@@ -10,9 +11,18 @@ const NAV_ITEMS = [
 const AVATAR_IMAGE =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuAd3lpSQDoU_3gmMFUvFJ97LcWxuhZnI4HBFFyZDIcHnCcKq51qp88JYvZTWxpg31NUOnF3GSfyUbK48JYZJSSVv58V2SU6nDGcVt06d_iHzsGXI-a35c1Fk6eepVfVikrtpvmYBOf05cMO2gpRnceM9SMksjX7ljxBDyOhGf5t3dhtuLmWPYiyVB9ll6bjSa9A8w_YmTywwKVsz7ooM3zCQVTjkvFKF52DmpBWjzpxZ2f8YGUrmWWah9tbu3jVWHMkhSu1Q4-q4g'
 
-function ClientHeader() {
+function ClientHeader({ searchValue, onSearchChange }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [localSearch, setLocalSearch] = useState('')
+
+  const isControlled = searchValue !== undefined
+  const search = isControlled ? searchValue : localSearch
+
+  const handleSearchChange = (e) => {
+    if (isControlled) onSearchChange?.(e.target.value)
+    else setLocalSearch(e.target.value)
+  }
 
   const handleLogout = () => {
     logout()
@@ -54,6 +64,8 @@ function ClientHeader() {
             className="w-full h-9 pl-9 pr-3 bg-surface-container-low border border-outline-variant rounded-full text-[13px] focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
             placeholder="Search venues, areas..."
             type="text"
+            value={search}
+            onChange={handleSearchChange}
           />
         </div>
       </div>

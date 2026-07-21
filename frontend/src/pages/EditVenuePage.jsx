@@ -44,8 +44,18 @@ function EditVenuePage() {
       <ProviderSidebar activeLabel="Dashboard" />
 
       {loading && (
-        <main className="flex-1 md:ml-52 flex items-center justify-center text-on-surface-variant">
-          Loading venue…
+        <main className="flex-1 md:ml-52 p-6 md:p-8 overflow-y-auto">
+          <div className="max-w-3xl mx-auto space-y-5 animate-pulse">
+            <div className="h-7 w-56 bg-surface-container rounded" />
+            <div className="h-40 bg-surface-container rounded-xl" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-11 bg-surface-container rounded-lg" />
+              ))}
+            </div>
+            <div className="h-24 bg-surface-container rounded-lg" />
+            <div className="h-10 w-40 bg-surface-container rounded-lg" />
+          </div>
         </main>
       )}
 

@@ -6,6 +6,7 @@ import MobileBottomNav from '../components/layout/MobileBottomNav'
 import StatCard from '../components/ui/StatCard'
 import EmptyStateCard from '../components/ui/EmptyStateCard'
 import VenueCard from '../components/ui/VenueCard'
+import VenueCardSkeleton from '../components/ui/VenueCardSkeleton'
 import Icon from '../components/ui/Icon'
 import { useAuth } from '../context/AuthContext'
 import { listMyVenues } from '../utils/api'
@@ -54,6 +55,17 @@ function ProviderDashboardPage() {
               />
             </div>
           </section>
+
+          {loading && (
+            <section>
+              <div className="h-4 w-28 bg-surface-container rounded mb-3 animate-pulse" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <VenueCardSkeleton key={i} />
+                ))}
+              </div>
+            </section>
+          )}
 
           {!loading && venues.length === 0 && (
             <section>
