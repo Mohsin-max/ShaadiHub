@@ -54,7 +54,7 @@ function VenueCard({ venue, showFavorite = true, editHref }) {
         )}
       </div>
       <div className="p-3.5">
-        <h3 className="font-headline-sm text-[15px] text-on-surface mb-1">{name}</h3>
+        <h3 className="font-headline-sm text-[17px] leading-snug text-on-surface mb-1">{name}</h3>
         <div className="flex items-center gap-1.5 text-on-surface-variant mb-2.5">
           <Icon name="location_on" className="text-[15px]" />
           <span className="text-[12px]">
