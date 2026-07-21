@@ -41,4 +41,14 @@ public class ImageStorageService
 
         return urls;
     }
+
+    public void DeleteVenueImage(string relativeUrl)
+    {
+        var relativePath = relativeUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+        var filePath = Path.Combine(_webRootPath, relativePath);
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
+    }
 }

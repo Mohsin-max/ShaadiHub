@@ -3,6 +3,7 @@ import SignupPage from './pages/SignupPage'
 import LoginPage from './pages/LoginPage'
 import ProviderDashboardPage from './pages/ProviderDashboardPage'
 import AddVenuePage from './pages/AddVenuePage'
+import EditVenuePage from './pages/EditVenuePage'
 import BrowseVenuesPage from './pages/BrowseVenuesPage'
 import FavoritesPage from './pages/FavoritesPage'
 import VenueDetailPage from './pages/VenueDetailPage'
@@ -27,6 +28,14 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['VenueOwner']}>
             <AddVenuePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/provider/venues/:id/edit"
+        element={
+          <ProtectedRoute allowedRoles={['VenueOwner']}>
+            <EditVenuePage />
           </ProtectedRoute>
         }
       />

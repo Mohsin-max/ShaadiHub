@@ -35,6 +35,40 @@ public class CreateVenueRequest
     public List<IFormFile> Images { get; set; } = new();
 }
 
+public class UpdateVenueRequest
+{
+    [Required, MaxLength(150)]
+    public string Name { get; set; } = string.Empty;
+
+    [Required, MaxLength(50)]
+    public string Type { get; set; } = string.Empty;
+
+    [Required, Range(1, 100000)]
+    public int Capacity { get; set; }
+
+    [Required]
+    public string GoogleMapsLink { get; set; } = string.Empty;
+
+    [Required, MaxLength(150)]
+    public string AreaName { get; set; } = string.Empty;
+
+    [Required, MaxLength(100)]
+    public string City { get; set; } = string.Empty;
+
+    [Required, Range(0, 100000000)]
+    public decimal Price { get; set; }
+
+    public decimal? WeekendPrice { get; set; }
+
+    public string? Description { get; set; }
+
+    public List<string> Amenities { get; set; } = new();
+
+    public List<int> RemoveImageIds { get; set; } = new();
+
+    public List<IFormFile> Images { get; set; } = new();
+}
+
 public class VenueImageResponse
 {
     public int Id { get; set; }

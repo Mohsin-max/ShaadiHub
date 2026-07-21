@@ -58,3 +58,7 @@ export function getVenue(id) {
 export function listMyVenues(token) {
   return request('/venues/mine', { headers: authHeaders(token) })
 }
+
+export function updateVenue(id, formData, token) {
+  return request(`/venues/${id}`, { method: 'PUT', body: formData, headers: authHeaders(token) })
+}

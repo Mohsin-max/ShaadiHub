@@ -69,6 +69,74 @@ public class VenuesController : ControllerBase
         return Ok(BuildResponse(created));
     }
 
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "VenueOwner")]
+    [RequestSizeLimit(50_000_000)]
+    public async Task<IActionResult> Update(int id, [FromForm] UpdateVenueRequest request)
+    {
+        var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var venue = await _context.Venues
+            .Include(v => v.Images)
+            .FirstOrDefaultAsync(v => v.Id == id);
+
+        if (venue is null)
+        {
+            return NotFound(new { message = "Venue not found." });
+        }
+
+        if (venue.OwnerId != ownerId)
+        {
+            return Forbid();
+        }
+
+        venue.Name = request.Name.Trim();
+        venue.Type = request.Type.Trim();
+        venue.Capacity = request.Capacity;
+        venue.GoogleMapsLink = request.GoogleMapsLink.Trim();
+        venue.AreaName = request.AreaName.Trim();
+        venue.City = request.City.Trim();
+        venue.Price = request.Price;
+        venue.WeekendPrice = request.WeekendPrice;
+        venue.Description = request.Description?.Trim();
+        venue.Amenities = request.Amenities
+            .Select(a => a.Trim())
+            .Where(a => a.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (request.RemoveImageIds.Count > 0)
+        {
+            var toRemove = venue.Images.Where(i => request.RemoveImageIds.Contains(i.Id)).ToList();
+            foreach (var image in toRemove)
+            {
+                _imageStorage.DeleteVenueImage(image.Url);
+                _context.VenueImages.Remove(image);
+            }
+        }
+
+        if (request.Images.Count > 0)
+        {
+            var nextSortOrder = venue.Images.Count > 0
+                ? venue.Images.Where(i => !request.RemoveImageIds.Contains(i.Id)).Select(i => i.SortOrder).DefaultIfEmpty(-1).Max() + 1
+                : 0;
+            var urls = await _imageStorage.SaveVenueImagesAsync(venue.Id, request.Images);
+            for (var i = 0; i < urls.Count; i++)
+            {
+                _context.VenueImages.Add(new VenueImage { VenueId = venue.Id, Url = urls[i], SortOrder = nextSortOrder + i });
+            }
+        }
+
+        await _context.SaveChangesAsync();
+
+        var updated = await _context.Venues
+            .Include(v => v.Owner)
+            .Include(v => v.Images)
+            .FirstAsync(v => v.Id == venue.Id);
+
+        return Ok(BuildResponse(updated));
+    }
+
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> List([FromQuery] string[]? city, [FromQuery] string[]? area, [FromQuery] string[]? type)

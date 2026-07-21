@@ -1,16 +1,26 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Icon from './Icon'
 
 function formatPrice(value) {
   return `Rs. ${Number(value).toLocaleString('en-PK')}`
 }
 
-function VenueCard({ venue, showFavorite = true }) {
+function VenueCard({ venue, showFavorite = true, editHref }) {
   const { id, images, type, name, areaName, city, capacity, price } = venue
   const image = images?.[0]?.url
+  const navigate = useNavigate()
+  const detailHref = `/venues/${id}`
 
   return (
-    <div className="group bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300">
+    <div
+      onClick={() => navigate(detailHref)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') navigate(detailHref)
+      }}
+      role="link"
+      tabIndex={0}
+      className="group bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+    >
       <div className="relative h-44 overflow-hidden bg-surface-container">
         {image ? (
           <img
@@ -27,9 +37,22 @@ function VenueCard({ venue, showFavorite = true }) {
           {type}
         </div>
         {showFavorite && (
-          <button className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/80 backdrop-blur shadow-sm flex items-center justify-center text-on-surface-variant hover:text-error transition-all">
+          <button
+            onClick={(e) => e.stopPropagation()}
+            className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/80 backdrop-blur shadow-sm flex items-center justify-center text-on-surface-variant hover:text-error transition-all"
+          >
             <Icon name="favorite" className="text-[18px]" />
           </button>
+        )}
+        {editHref && (
+          <Link
+            to={editHref}
+            onClick={(e) => e.stopPropagation()}
+            className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/80 backdrop-blur shadow-sm flex items-center justify-center text-on-surface-variant hover:text-primary transition-all"
+            aria-label="Edit venue"
+          >
+            <Icon name="edit" className="text-[16px]" />
+          </Link>
         )}
       </div>
       <div className="p-4">
@@ -55,12 +78,10 @@ function VenueCard({ venue, showFavorite = true }) {
             <p className="text-[11px] text-on-surface-variant">Starting from</p>
             <p className="text-[16px] font-bold text-secondary">{formatPrice(price)}</p>
           </div>
-          <Link
-            to={`/venues/${id}`}
-            className="h-9 px-4 rounded-lg bg-primary text-on-primary text-[13px] font-semibold hover:bg-primary-container transition-all flex items-center"
-          >
-            Details
-          </Link>
+          <Icon
+            name="chevron_right"
+            className="text-on-surface-variant group-hover:text-primary group-hover:translate-x-0.5 transition-all text-[20px]"
+          />
         </div>
       </div>
     </div>
