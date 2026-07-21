@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import Icon from '../ui/Icon'
+import NotificationBadge from '../ui/NotificationBadge'
 import { useAuth } from '../../context/AuthContext'
+import useBookingNotificationCount from '../../hooks/useBookingNotificationCount'
 
 const BASE_NAV_ITEMS = [
   { label: 'Browse Venues', to: '/venues' },
@@ -15,6 +17,7 @@ function ClientHeader({ searchValue, onSearchChange }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [localSearch, setLocalSearch] = useState('')
+  const notificationCount = useBookingNotificationCount()
 
   const isControlled = searchValue !== undefined
   const search = isControlled ? searchValue : localSearch
@@ -46,7 +49,7 @@ function ClientHeader({ searchValue, onSearchChange }) {
               key={item.label}
               to={item.to}
               className={({ isActive }) =>
-                `text-[13px] font-semibold pb-1 border-b-2 transition-colors ${
+                `flex items-center gap-1.5 text-[13px] font-semibold pb-1 border-b-2 transition-colors ${
                   isActive
                     ? 'text-primary border-primary'
                     : 'text-on-surface-variant border-transparent hover:text-secondary'
@@ -54,6 +57,7 @@ function ClientHeader({ searchValue, onSearchChange }) {
               }
             >
               {item.label}
+              {item.label === 'My Requests' && <NotificationBadge count={notificationCount} />}
             </NavLink>
           ))}
         </nav>
@@ -86,9 +90,15 @@ function ClientHeader({ searchValue, onSearchChange }) {
           </Link>
         )}
 
-        <button className="p-1.5 text-on-surface-variant hover:text-primary transition-colors">
+        <Link
+          to={user?.role === 'Client' ? '/my-requests' : user?.role === 'VenueOwner' ? '/provider/inquiries' : '#'}
+          className="relative p-1.5 text-on-surface-variant hover:text-primary transition-colors"
+        >
           <Icon name="notifications" className="text-[20px]" />
-        </button>
+          {notificationCount > 0 && (
+            <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-error ring-2 ring-background" />
+          )}
+        </Link>
 
         {user ? (
           <div className="flex items-center gap-2">

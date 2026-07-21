@@ -95,6 +95,34 @@ public class BookingRequestsController : ControllerBase
         return Ok(requests.Select(r => BuildResponse(r, viewerIsOwner: true)));
     }
 
+    [HttpGet("notifications/count")]
+    [Authorize]
+    public async Task<IActionResult> NotificationCount()
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var role = User.FindFirstValue(ClaimTypes.Role);
+
+        var pendingStatuses = new List<BookingStatus> { BookingStatus.Pending, BookingStatus.Countered };
+
+        int count;
+        if (role == "Client")
+        {
+            count = await _context.BookingRequests.CountAsync(b =>
+                b.ClientId == userId && pendingStatuses.Contains(b.Status) && b.Turn == BookingTurn.Client);
+        }
+        else if (role == "VenueOwner")
+        {
+            count = await _context.BookingRequests.CountAsync(b =>
+                b.Venue.OwnerId == userId && pendingStatuses.Contains(b.Status) && b.Turn == BookingTurn.Owner);
+        }
+        else
+        {
+            count = 0;
+        }
+
+        return Ok(new { count });
+    }
+
     [HttpGet("{id:int}")]
     [Authorize]
     public async Task<IActionResult> GetById(int id)

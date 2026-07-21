@@ -91,6 +91,10 @@ export function listReceivedBookingRequests(token) {
   return request('/booking-requests/received', { headers: authHeaders(token) })
 }
 
+export function getBookingNotificationCount(token) {
+  return request('/booking-requests/notifications/count', { headers: authHeaders(token) })
+}
+
 export function getBookingRequest(id, token) {
   return request(`/booking-requests/${id}`, { headers: authHeaders(token) })
 }

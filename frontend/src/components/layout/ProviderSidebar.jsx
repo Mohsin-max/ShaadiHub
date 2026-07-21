@@ -1,6 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
 import Icon from '../ui/Icon'
+import NotificationBadge from '../ui/NotificationBadge'
 import { useAuth } from '../../context/AuthContext'
+import useBookingNotificationCount from '../../hooks/useBookingNotificationCount'
 
 const NAV_ITEMS = [
   { icon: 'dashboard', label: 'Dashboard', to: '/provider/dashboard' },
@@ -18,6 +20,7 @@ const PROFILE_IMAGE =
 function ProviderSidebar({ activeLabel = 'Dashboard' }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const notificationCount = useBookingNotificationCount()
 
   const handleLogout = () => {
     logout()
@@ -61,7 +64,8 @@ function ProviderSidebar({ activeLabel = 'Dashboard' }) {
               }`}
             >
               <Icon name={item.icon} className="text-[18px]" />
-              <span className="font-label-caps text-[10px] uppercase">{item.label}</span>
+              <span className="font-label-caps text-[10px] uppercase flex-1">{item.label}</span>
+              {item.label === 'Inquiries' && <NotificationBadge count={notificationCount} />}
             </Link>
           )
         })}
