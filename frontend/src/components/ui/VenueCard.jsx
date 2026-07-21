@@ -34,9 +34,6 @@ function VenueCard({ venue, showFavorite = true, editHref }) {
           </div>
         )}
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/55 via-black/10 to-transparent pointer-events-none" />
-        <div className="absolute top-3 left-3 bg-primary text-on-primary text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm ring-1 ring-antique-gold/40">
-          {type}
-        </div>
         {showFavorite && (
           <button
             onClick={(e) => e.stopPropagation()}

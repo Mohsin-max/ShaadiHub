@@ -59,7 +59,7 @@ function ProviderDashboardPage() {
           {loading && (
             <section>
               <div className="h-4 w-28 bg-surface-container rounded mb-3 animate-pulse" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,260px))] gap-4">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <VenueCardSkeleton key={i} />
                 ))}
@@ -86,7 +86,7 @@ function ProviderDashboardPage() {
                 <Icon name="storefront" className="text-secondary text-[18px]" />
                 My Venues
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,260px))] gap-4">
                 {venues.map((venue) => (
                   <VenueCard
                     key={venue.id}
