@@ -64,6 +64,8 @@ public class BookingRequestsController : ControllerBase
             Note = dto.Note?.Trim(),
         });
 
+        request.ClientViewedAt = DateTime.UtcNow;
+
         _context.BookingRequests.Add(request);
         await _context.SaveChangesAsync();
 
@@ -112,20 +114,19 @@ public class BookingRequestsController : ControllerBase
 
     private async Task<int> GetNotificationCountAsync(int userId, string? role)
     {
-        var pendingStatuses = new List<BookingStatus> { BookingStatus.Pending, BookingStatus.Countered };
-
+        // "Unseen" = the request has changed since this role last opened its detail page
+        // (or they've never opened it at all). This covers every kind of update — a new
+        // request, a counter-offer, an accept/reject, a cancellation, a date-change
+        // request/response — not just the narrower "it's your turn to act" case.
         if (role == "Client")
         {
             return await _context.BookingRequests.CountAsync(b =>
-                b.ClientId == userId && pendingStatuses.Contains(b.Status) && b.Turn == BookingTurn.Client);
+                b.ClientId == userId && (b.ClientViewedAt == null || b.UpdatedAt > b.ClientViewedAt));
         }
         if (role == "VenueOwner")
         {
-            var negotiationCount = await _context.BookingRequests.CountAsync(b =>
-                b.Venue.OwnerId == userId && pendingStatuses.Contains(b.Status) && b.Turn == BookingTurn.Owner);
-            var dateChangeCount = await _context.BookingRequests.CountAsync(b =>
-                b.Venue.OwnerId == userId && b.Status == BookingStatus.Booked && b.PendingNewDate != null);
-            return negotiationCount + dateChangeCount;
+            return await _context.BookingRequests.CountAsync(b =>
+                b.Venue.OwnerId == userId && (b.OwnerViewedAt == null || b.UpdatedAt > b.OwnerViewedAt));
         }
         return 0;
     }
@@ -154,6 +155,17 @@ public class BookingRequestsController : ControllerBase
         {
             return Forbid();
         }
+
+        if (isClient)
+        {
+            request.ClientViewedAt = DateTime.UtcNow;
+        }
+        if (isOwner)
+        {
+            request.OwnerViewedAt = DateTime.UtcNow;
+        }
+        await _context.SaveChangesAsync();
+        await PushNotificationCountAsync(userId, isOwner ? "VenueOwner" : "Client");
 
         return Ok(BuildResponse(request, viewerIsOwner: isOwner));
     }
@@ -230,6 +242,14 @@ public class BookingRequestsController : ControllerBase
         }
 
         request.UpdatedAt = DateTime.UtcNow;
+        if (isOwner)
+        {
+            request.OwnerViewedAt = request.UpdatedAt;
+        }
+        else
+        {
+            request.ClientViewedAt = request.UpdatedAt;
+        }
         await _context.SaveChangesAsync();
 
         var updated = await LoadFullAsync(id);
@@ -271,6 +291,14 @@ public class BookingRequestsController : ControllerBase
         request.CancelledBy = isOwner ? BookingTurn.Owner : BookingTurn.Client;
         request.CancelReason = dto.Reason.Trim();
         request.UpdatedAt = DateTime.UtcNow;
+        if (isOwner)
+        {
+            request.OwnerViewedAt = request.UpdatedAt;
+        }
+        else
+        {
+            request.ClientViewedAt = request.UpdatedAt;
+        }
         await _context.SaveChangesAsync();
 
         var updated = await LoadFullAsync(id);
@@ -324,6 +352,7 @@ public class BookingRequestsController : ControllerBase
         request.PendingNewDate = dto.NewDate;
         request.DateChangeNote = dto.Note?.Trim();
         request.UpdatedAt = DateTime.UtcNow;
+        request.ClientViewedAt = request.UpdatedAt;
         await _context.SaveChangesAsync();
 
         var updated = await LoadFullAsync(id);
@@ -370,6 +399,7 @@ public class BookingRequestsController : ControllerBase
         request.PendingNewDate = null;
         request.DateChangeNote = null;
         request.UpdatedAt = DateTime.UtcNow;
+        request.OwnerViewedAt = request.UpdatedAt;
         await _context.SaveChangesAsync();
 
         var updated = await LoadFullAsync(id);

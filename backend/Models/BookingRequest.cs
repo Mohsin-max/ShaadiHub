@@ -38,6 +38,9 @@ public class BookingRequest
     public DateOnly? PendingNewDate { get; set; }
     public string? DateChangeNote { get; set; }
 
+    public DateTime? ClientViewedAt { get; set; }
+    public DateTime? OwnerViewedAt { get; set; }
+
     public List<BookingOffer> Offers { get; set; } = new();
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
