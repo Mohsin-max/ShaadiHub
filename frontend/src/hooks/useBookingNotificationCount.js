@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
+import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 import { useAuth } from '../context/AuthContext'
-import { getBookingNotificationCount } from '../utils/api'
-
-const POLL_INTERVAL_MS = 25000
+import { getBookingNotificationCount, getHubUrl } from '../utils/api'
 
 function useBookingNotificationCount() {
   const { user } = useAuth()
@@ -14,15 +13,30 @@ function useBookingNotificationCount() {
       return
     }
 
-    const fetchCount = () => {
-      getBookingNotificationCount(user.token)
-        .then((data) => setCount(data.count))
-        .catch(() => {})
-    }
+    let active = true
 
-    fetchCount()
-    const interval = setInterval(fetchCount, POLL_INTERVAL_MS)
-    return () => clearInterval(interval)
+    getBookingNotificationCount(user.token)
+      .then((data) => {
+        if (active) setCount(data.count)
+      })
+      .catch(() => {})
+
+    const connection = new HubConnectionBuilder()
+      .withUrl(getHubUrl(`/hubs/notifications?access_token=${encodeURIComponent(user.token)}`))
+      .withAutomaticReconnect()
+      .configureLogging(LogLevel.None)
+      .build()
+
+    connection.on('notificationCount', (newCount) => {
+      if (active) setCount(newCount)
+    })
+
+    connection.start().catch(() => {})
+
+    return () => {
+      active = false
+      connection.stop()
+    }
   }, [user?.token, user?.role])
 
   return count

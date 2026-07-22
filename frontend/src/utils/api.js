@@ -1,5 +1,9 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5114/api'
 
+export function getHubUrl(hubPath) {
+  return `${API_URL.replace(/\/api\/?$/, '')}${hubPath}`
+}
+
 async function request(path, options = {}) {
   const isFormData = options.body instanceof FormData
 

@@ -1,9 +1,11 @@
 using System.Security.Claims;
 using backend.Data;
 using backend.DTOs;
+using backend.Hubs;
 using backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
@@ -13,10 +15,12 @@ namespace backend.Controllers;
 public class BookingRequestsController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IHubContext<NotificationHub> _hub;
 
-    public BookingRequestsController(AppDbContext context)
+    public BookingRequestsController(AppDbContext context, IHubContext<NotificationHub> hub)
     {
         _context = context;
+        _hub = hub;
     }
 
     [HttpPost]
@@ -64,6 +68,7 @@ public class BookingRequestsController : ControllerBase
         await _context.SaveChangesAsync();
 
         var created = await LoadFullAsync(request.Id);
+        await PushNotificationCountAsync(venue.OwnerId, "VenueOwner");
         return Ok(BuildResponse(created!, viewerIsOwner: false));
     }
 
@@ -101,26 +106,31 @@ public class BookingRequestsController : ControllerBase
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var role = User.FindFirstValue(ClaimTypes.Role);
+        var count = await GetNotificationCountAsync(userId, role);
+        return Ok(new { count });
+    }
 
+    private async Task<int> GetNotificationCountAsync(int userId, string? role)
+    {
         var pendingStatuses = new List<BookingStatus> { BookingStatus.Pending, BookingStatus.Countered };
 
-        int count;
         if (role == "Client")
         {
-            count = await _context.BookingRequests.CountAsync(b =>
+            return await _context.BookingRequests.CountAsync(b =>
                 b.ClientId == userId && pendingStatuses.Contains(b.Status) && b.Turn == BookingTurn.Client);
         }
-        else if (role == "VenueOwner")
+        if (role == "VenueOwner")
         {
-            count = await _context.BookingRequests.CountAsync(b =>
+            return await _context.BookingRequests.CountAsync(b =>
                 b.Venue.OwnerId == userId && pendingStatuses.Contains(b.Status) && b.Turn == BookingTurn.Owner);
         }
-        else
-        {
-            count = 0;
-        }
+        return 0;
+    }
 
-        return Ok(new { count });
+    private async Task PushNotificationCountAsync(int userId, string role)
+    {
+        var count = await GetNotificationCountAsync(userId, role);
+        await _hub.Clients.User(userId.ToString()).SendAsync("notificationCount", count);
     }
 
     [HttpGet("{id:int}")]
@@ -220,6 +230,8 @@ public class BookingRequestsController : ControllerBase
         await _context.SaveChangesAsync();
 
         var updated = await LoadFullAsync(id);
+        await PushNotificationCountAsync(request.ClientId, "Client");
+        await PushNotificationCountAsync(request.Venue.OwnerId, "VenueOwner");
         return Ok(BuildResponse(updated!, viewerIsOwner: isOwner));
     }
 
