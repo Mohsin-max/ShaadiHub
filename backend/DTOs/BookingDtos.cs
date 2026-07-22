@@ -23,6 +23,39 @@ public class RespondBookingRequestDto
     public string? Note { get; set; }
 }
 
+public class CancelBookingRequestDto
+{
+    [Required]
+    public string Reason { get; set; } = string.Empty;
+}
+
+public class RequestDateChangeDto
+{
+    [Required]
+    public DateOnly NewDate { get; set; }
+
+    public string? Note { get; set; }
+}
+
+public class RespondDateChangeDto
+{
+    [Required]
+    public string Action { get; set; } = string.Empty; // Accept | Reject
+}
+
+public class AddBlockedDateDto
+{
+    [Required]
+    public DateOnly Date { get; set; }
+}
+
+public class BookedDateResponse
+{
+    public string Date { get; set; } = string.Empty;
+    public string Source { get; set; } = string.Empty; // Request | Manual
+    public int? RequestId { get; set; }
+}
+
 public class BookingOfferResponse
 {
     public int Id { get; set; }
@@ -61,8 +94,17 @@ public class BookingRequestResponse
     public string Turn { get; set; } = string.Empty;
     public string? RejectReason { get; set; }
 
+    public string? CancelledBy { get; set; }
+    public string? CancelReason { get; set; }
+
+    public DateOnly? PendingNewDate { get; set; }
+    public string? DateChangeNote { get; set; }
+
     public string ViewerRole { get; set; } = string.Empty;
     public bool IsMyTurn { get; set; }
+    public bool CanCancel { get; set; }
+    public bool CanRequestDateChange { get; set; }
+    public bool CanRespondToDateChange { get; set; }
 
     public List<BookingOfferResponse> Offers { get; set; } = new();
     public BookingContactInfo? ContactInfo { get; set; }

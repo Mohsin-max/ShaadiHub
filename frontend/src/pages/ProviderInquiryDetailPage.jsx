@@ -6,7 +6,13 @@ import MobileBottomNav from '../components/layout/MobileBottomNav'
 import NegotiationDetail from '../components/ui/NegotiationDetail'
 import Icon from '../components/ui/Icon'
 import { useAuth } from '../context/AuthContext'
-import { getBookingRequest, respondBookingRequest } from '../utils/api'
+import {
+  getBookingRequest,
+  respondBookingRequest,
+  cancelBookingRequest,
+  requestDateChange,
+  respondDateChange,
+} from '../utils/api'
 
 function ProviderInquiryDetailPage() {
   const { id } = useParams()
@@ -30,6 +36,45 @@ function ProviderInquiryDetailPage() {
     setRespondError('')
     try {
       const updated = await respondBookingRequest(id, { action, ...payload }, user?.token)
+      setRequest(updated)
+    } catch (err) {
+      setRespondError(err.message)
+    } finally {
+      setResponding(false)
+    }
+  }
+
+  const handleCancel = async (reason) => {
+    setResponding(true)
+    setRespondError('')
+    try {
+      const updated = await cancelBookingRequest(id, reason, user?.token)
+      setRequest(updated)
+    } catch (err) {
+      setRespondError(err.message)
+    } finally {
+      setResponding(false)
+    }
+  }
+
+  const handleRequestDateChange = async (dateStr, note) => {
+    setResponding(true)
+    setRespondError('')
+    try {
+      const updated = await requestDateChange(id, { newDate: dateStr, note }, user?.token)
+      setRequest(updated)
+    } catch (err) {
+      setRespondError(err.message)
+    } finally {
+      setResponding(false)
+    }
+  }
+
+  const handleRespondDateChange = async (action) => {
+    setResponding(true)
+    setRespondError('')
+    try {
+      const updated = await respondDateChange(id, action, user?.token)
       setRequest(updated)
     } catch (err) {
       setRespondError(err.message)
@@ -75,6 +120,9 @@ function ProviderInquiryDetailPage() {
               onRespond={handleRespond}
               responding={responding}
               respondError={respondError}
+              onCancel={handleCancel}
+              onRequestDateChange={handleRequestDateChange}
+              onRespondDateChange={handleRespondDateChange}
             />
           )}
         </div>

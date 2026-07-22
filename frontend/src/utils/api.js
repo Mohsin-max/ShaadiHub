@@ -110,3 +110,42 @@ export function respondBookingRequest(id, payload, token) {
     headers: authHeaders(token),
   })
 }
+
+export function cancelBookingRequest(id, reason, token) {
+  return request(`/booking-requests/${id}/cancel`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+    headers: authHeaders(token),
+  })
+}
+
+export function requestDateChange(id, payload, token) {
+  return request(`/booking-requests/${id}/request-date-change`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: authHeaders(token),
+  })
+}
+
+export function respondDateChange(id, action, token) {
+  return request(`/booking-requests/${id}/respond-date-change`, {
+    method: 'POST',
+    body: JSON.stringify({ action }),
+    headers: authHeaders(token),
+  })
+}
+
+export function addBlockedDate(venueId, date, token) {
+  return request(`/venues/${venueId}/blocked-dates`, {
+    method: 'POST',
+    body: JSON.stringify({ date }),
+    headers: authHeaders(token),
+  })
+}
+
+export function removeBlockedDate(venueId, date, token) {
+  return request(`/venues/${venueId}/blocked-dates/${date}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  })
+}

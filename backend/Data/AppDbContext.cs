@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<VenueImage> VenueImages => Set<VenueImage>();
     public DbSet<BookingRequest> BookingRequests => Set<BookingRequest>();
     public DbSet<BookingOffer> BookingOffers => Set<BookingOffer>();
+    public DbSet<ManualBlockedDate> ManualBlockedDates => Set<ManualBlockedDate>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -65,6 +66,7 @@ public class AppDbContext : DbContext
         {
             entity.Property(b => b.Status).HasConversion<string>().HasMaxLength(20);
             entity.Property(b => b.Turn).HasConversion<string>().HasMaxLength(10);
+            entity.Property(b => b.CancelledBy).HasConversion<string>().HasMaxLength(10);
             entity.Property(b => b.ListedPriceSnapshot).HasColumnType("decimal(12,2)");
 
             entity.HasOne(b => b.Venue)
@@ -89,6 +91,16 @@ public class AppDbContext : DbContext
                 .WithMany(b => b.Offers)
                 .HasForeignKey(o => o.BookingRequestId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ManualBlockedDate>(entity =>
+        {
+            entity.HasOne(m => m.Venue)
+                .WithMany()
+                .HasForeignKey(m => m.VenueId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(m => new { m.VenueId, m.Date }).IsUnique();
         });
     }
 }

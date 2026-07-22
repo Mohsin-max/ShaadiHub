@@ -3,6 +3,7 @@ const STATUS_STYLES = {
   Countered: 'bg-amber-100 text-amber-800',
   Booked: 'bg-primary text-on-primary',
   Rejected: 'bg-error-container text-on-error-container',
+  Cancelled: 'bg-surface-container-high text-on-surface-variant',
 }
 
 const STATUS_LABELS = {
@@ -10,6 +11,7 @@ const STATUS_LABELS = {
   Countered: 'Countered',
   Booked: 'Booked',
   Rejected: 'Rejected',
+  Cancelled: 'Cancelled',
 }
 
 function StatusBadge({ status, className = '' }) {

@@ -41,7 +41,7 @@ function BookingRequestModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (bookedDates.includes(selectedDate)) {
+    if (bookedDates.some((b) => b.date === selectedDate)) {
       setError('That date is already booked for this venue — please pick another.')
       return
     }

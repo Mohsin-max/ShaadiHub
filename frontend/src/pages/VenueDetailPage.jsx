@@ -13,7 +13,13 @@ import BookingRequestModal from '../components/ui/BookingRequestModal'
 import PhoneNumberModal from '../components/ui/PhoneNumberModal'
 import VenueDetailSkeleton from '../components/ui/VenueDetailSkeleton'
 import { useAuth } from '../context/AuthContext'
-import { getVenue, getBookedDates, listMyBookingRequests } from '../utils/api'
+import {
+  getVenue,
+  getBookedDates,
+  listMyBookingRequests,
+  addBlockedDate,
+  removeBlockedDate,
+} from '../utils/api'
 
 const CATERING_LABELS = {
   Internal: 'Provided by Venue',
@@ -56,6 +62,8 @@ function VenueDetailPage() {
   const [phoneModalOpen, setPhoneModalOpen] = useState(false)
   const [pendingDate, setPendingDate] = useState(null)
   const [myBookedRequest, setMyBookedRequest] = useState(null)
+  const [togglingDate, setTogglingDate] = useState(null)
+  const [blockError, setBlockError] = useState('')
 
   useEffect(() => {
     setLoading(true)
@@ -122,6 +130,24 @@ function VenueDetailPage() {
 
   const handleBookingSuccess = (created) => {
     navigate(`/my-requests/${created.id}`)
+  }
+
+  const handleToggleBlock = async (dateStr, isCurrentlyBlocked) => {
+    setTogglingDate(dateStr)
+    setBlockError('')
+    try {
+      if (isCurrentlyBlocked) {
+        await removeBlockedDate(id, dateStr, user.token)
+      } else {
+        await addBlockedDate(id, dateStr, user.token)
+      }
+      const refreshed = await getBookedDates(id)
+      setBookedDates(refreshed)
+    } catch (err) {
+      setBlockError(err.message)
+    } finally {
+      setTogglingDate(null)
+    }
   }
 
   if (loading) {
@@ -325,11 +351,17 @@ function VenueDetailPage() {
                 </div>
               </div>
 
+              {isOwner && blockError && (
+                <p className="text-[13px] text-error bg-error-container rounded-lg px-3.5 py-2.5">{blockError}</p>
+              )}
               <AvailabilityCalendar
                 bookedDates={bookedDates}
                 selectable={!isOwner}
                 selectedDate={selectedDate}
                 onSelectDate={handleSelectDate}
+                editable={isOwner}
+                onToggleBlock={handleToggleBlock}
+                togglingDate={togglingDate}
               />
             </div>
 

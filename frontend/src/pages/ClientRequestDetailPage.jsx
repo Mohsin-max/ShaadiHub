@@ -6,7 +6,13 @@ import NegotiationDetail from '../components/ui/NegotiationDetail'
 import BookingSuccessModal from '../components/ui/BookingSuccessModal'
 import Icon from '../components/ui/Icon'
 import { useAuth } from '../context/AuthContext'
-import { getBookingRequest, respondBookingRequest } from '../utils/api'
+import {
+  getBookingRequest,
+  respondBookingRequest,
+  cancelBookingRequest,
+  requestDateChange,
+  respondDateChange,
+} from '../utils/api'
 
 const FOOTER_LINKS = [
   { label: 'About', href: '#' },
@@ -49,6 +55,45 @@ function ClientRequestDetailPage() {
     }
   }
 
+  const handleCancel = async (reason) => {
+    setResponding(true)
+    setRespondError('')
+    try {
+      const updated = await cancelBookingRequest(id, reason, user?.token)
+      setRequest(updated)
+    } catch (err) {
+      setRespondError(err.message)
+    } finally {
+      setResponding(false)
+    }
+  }
+
+  const handleRequestDateChange = async (dateStr, note) => {
+    setResponding(true)
+    setRespondError('')
+    try {
+      const updated = await requestDateChange(id, { newDate: dateStr, note }, user?.token)
+      setRequest(updated)
+    } catch (err) {
+      setRespondError(err.message)
+    } finally {
+      setResponding(false)
+    }
+  }
+
+  const handleRespondDateChange = async (action) => {
+    setResponding(true)
+    setRespondError('')
+    try {
+      const updated = await respondDateChange(id, action, user?.token)
+      setRequest(updated)
+    } catch (err) {
+      setRespondError(err.message)
+    } finally {
+      setResponding(false)
+    }
+  }
+
   return (
     <div className="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
       <ClientHeader />
@@ -84,6 +129,9 @@ function ClientRequestDetailPage() {
               onRespond={handleRespond}
               responding={responding}
               respondError={respondError}
+              onCancel={handleCancel}
+              onRequestDateChange={handleRequestDateChange}
+              onRespondDateChange={handleRespondDateChange}
             />
           )}
         </div>

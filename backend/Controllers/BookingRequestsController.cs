@@ -121,8 +121,11 @@ public class BookingRequestsController : ControllerBase
         }
         if (role == "VenueOwner")
         {
-            return await _context.BookingRequests.CountAsync(b =>
+            var negotiationCount = await _context.BookingRequests.CountAsync(b =>
                 b.Venue.OwnerId == userId && pendingStatuses.Contains(b.Status) && b.Turn == BookingTurn.Owner);
+            var dateChangeCount = await _context.BookingRequests.CountAsync(b =>
+                b.Venue.OwnerId == userId && b.Status == BookingStatus.Booked && b.PendingNewDate != null);
+            return negotiationCount + dateChangeCount;
         }
         return 0;
     }
@@ -174,7 +177,7 @@ public class BookingRequestsController : ControllerBase
             return Forbid();
         }
 
-        if (request.Status is BookingStatus.Booked or BookingStatus.Rejected)
+        if (request.Status is BookingStatus.Booked or BookingStatus.Rejected or BookingStatus.Cancelled)
         {
             return BadRequest(new { message = "This request has already been finalized." });
         }
@@ -235,17 +238,161 @@ public class BookingRequestsController : ControllerBase
         return Ok(BuildResponse(updated!, viewerIsOwner: isOwner));
     }
 
+    [HttpPost("{id:int}/cancel")]
+    [Authorize]
+    public async Task<IActionResult> Cancel(int id, CancelBookingRequestDto dto)
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var request = await LoadFullAsync(id);
+        if (request is null)
+        {
+            return NotFound(new { message = "Booking request not found." });
+        }
+
+        var isClient = request.ClientId == userId;
+        var isOwner = request.Venue.OwnerId == userId;
+        if (!isClient && !isOwner)
+        {
+            return Forbid();
+        }
+
+        if (request.Status != BookingStatus.Booked)
+        {
+            return BadRequest(new { message = "Only a booked reservation can be cancelled." });
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.Reason))
+        {
+            return BadRequest(new { message = "Please provide a short reason for cancelling." });
+        }
+
+        request.Status = BookingStatus.Cancelled;
+        request.CancelledBy = isOwner ? BookingTurn.Owner : BookingTurn.Client;
+        request.CancelReason = dto.Reason.Trim();
+        request.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        var updated = await LoadFullAsync(id);
+        await PushNotificationCountAsync(request.ClientId, "Client");
+        await PushNotificationCountAsync(request.Venue.OwnerId, "VenueOwner");
+        return Ok(BuildResponse(updated!, viewerIsOwner: isOwner));
+    }
+
+    [HttpPost("{id:int}/request-date-change")]
+    [Authorize(Roles = "Client")]
+    public async Task<IActionResult> RequestDateChange(int id, RequestDateChangeDto dto)
+    {
+        var clientId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var request = await LoadFullAsync(id);
+        if (request is null)
+        {
+            return NotFound(new { message = "Booking request not found." });
+        }
+        if (request.ClientId != clientId)
+        {
+            return Forbid();
+        }
+        if (request.Status != BookingStatus.Booked)
+        {
+            return BadRequest(new { message = "Only a booked reservation's date can be changed." });
+        }
+        if (request.PendingNewDate is not null)
+        {
+            return BadRequest(new { message = "A date change request is already pending." });
+        }
+        if (dto.NewDate < DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            return BadRequest(new { message = "You can't request a date in the past." });
+        }
+        if (dto.NewDate == request.EventDate)
+        {
+            return BadRequest(new { message = "That's already the current date." });
+        }
+
+        var conflict = await _context.BookingRequests.AnyAsync(b =>
+            b.Id != request.Id && b.VenueId == request.VenueId &&
+            b.EventDate == dto.NewDate && b.Status == BookingStatus.Booked);
+        var manualConflict = await _context.ManualBlockedDates.AnyAsync(m =>
+            m.VenueId == request.VenueId && m.Date == dto.NewDate);
+        if (conflict || manualConflict)
+        {
+            return BadRequest(new { message = "That date is already booked for this venue." });
+        }
+
+        request.PendingNewDate = dto.NewDate;
+        request.DateChangeNote = dto.Note?.Trim();
+        request.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        var updated = await LoadFullAsync(id);
+        await PushNotificationCountAsync(request.Venue.OwnerId, "VenueOwner");
+        return Ok(BuildResponse(updated!, viewerIsOwner: false));
+    }
+
+    [HttpPost("{id:int}/respond-date-change")]
+    [Authorize(Roles = "VenueOwner")]
+    public async Task<IActionResult> RespondDateChange(int id, RespondDateChangeDto dto)
+    {
+        var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var request = await LoadFullAsync(id);
+        if (request is null)
+        {
+            return NotFound(new { message = "Booking request not found." });
+        }
+        if (request.Venue.OwnerId != ownerId)
+        {
+            return Forbid();
+        }
+        if (request.Status != BookingStatus.Booked || request.PendingNewDate is null)
+        {
+            return BadRequest(new { message = "There is no pending date change to respond to." });
+        }
+
+        if (dto.Action == "Accept")
+        {
+            var conflict = await _context.BookingRequests.AnyAsync(b =>
+                b.Id != request.Id && b.VenueId == request.VenueId &&
+                b.EventDate == request.PendingNewDate && b.Status == BookingStatus.Booked);
+            if (conflict)
+            {
+                return BadRequest(new { message = "That date has since been booked by someone else." });
+            }
+            request.EventDate = request.PendingNewDate.Value;
+        }
+        else if (dto.Action != "Reject")
+        {
+            return BadRequest(new { message = "Invalid action." });
+        }
+
+        request.PendingNewDate = null;
+        request.DateChangeNote = null;
+        request.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        var updated = await LoadFullAsync(id);
+        await PushNotificationCountAsync(request.ClientId, "Client");
+        return Ok(BuildResponse(updated!, viewerIsOwner: true));
+    }
+
     [HttpGet]
     [Route("/api/venues/{venueId:int}/booked-dates")]
     [AllowAnonymous]
     public async Task<IActionResult> BookedDates(int venueId)
     {
-        var dates = await _context.BookingRequests
+        var requestDates = await _context.BookingRequests
             .Where(b => b.VenueId == venueId && b.Status == BookingStatus.Booked)
-            .Select(b => b.EventDate)
+            .Select(b => new BookedDateResponse { Date = b.EventDate.ToString("yyyy-MM-dd"), Source = "Request", RequestId = b.Id })
             .ToListAsync();
 
-        return Ok(dates.Select(d => d.ToString("yyyy-MM-dd")));
+        var manualDates = await _context.ManualBlockedDates
+            .Where(m => m.VenueId == venueId)
+            .Select(m => new BookedDateResponse { Date = m.Date.ToString("yyyy-MM-dd"), Source = "Manual" })
+            .ToListAsync();
+
+        return Ok(requestDates.Concat(manualDates));
     }
 
     private IQueryable<BookingRequest> Query()
@@ -270,9 +417,12 @@ public class BookingRequestsController : ControllerBase
 
         var viewerRole = viewerIsOwner ? BookingTurn.Owner : BookingTurn.Client;
         var isMyTurn = (request.Status is BookingStatus.Pending or BookingStatus.Countered) && request.Turn == viewerRole;
+        var canCancel = request.Status == BookingStatus.Booked;
+        var canRequestDateChange = request.Status == BookingStatus.Booked && request.PendingNewDate is null && viewerRole == BookingTurn.Client;
+        var canRespondToDateChange = request.Status == BookingStatus.Booked && request.PendingNewDate is not null && viewerRole == BookingTurn.Owner;
 
         BookingContactInfo? contactInfo = null;
-        if (request.Status == BookingStatus.Booked)
+        if (request.Status is BookingStatus.Booked or BookingStatus.Cancelled)
         {
             contactInfo = new BookingContactInfo
             {
@@ -299,8 +449,15 @@ public class BookingRequestsController : ControllerBase
             Status = request.Status.ToString(),
             Turn = request.Turn.ToString(),
             RejectReason = request.RejectReason,
+            CancelledBy = request.CancelledBy?.ToString(),
+            CancelReason = request.CancelReason,
+            PendingNewDate = request.PendingNewDate,
+            DateChangeNote = request.DateChangeNote,
             ViewerRole = viewerRole.ToString(),
             IsMyTurn = isMyTurn,
+            CanCancel = canCancel,
+            CanRequestDateChange = canRequestDateChange,
+            CanRespondToDateChange = canRespondToDateChange,
             Offers = orderedOffers.Select(o => new BookingOfferResponse
             {
                 Id = o.Id,

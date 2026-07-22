@@ -45,11 +45,21 @@ const CELL_STYLES = {
     'bg-white border border-outline-variant text-on-surface hover:border-antique-gold hover:bg-antique-gold/10 hover:text-primary cursor-pointer transition-colors',
   selected: 'bg-antique-gold border-antique-gold text-primary font-bold ring-2 ring-antique-gold/40',
   booked: 'bg-primary border border-primary text-on-primary font-semibold',
+  'booked-editable':
+    'bg-primary border border-primary text-on-primary font-semibold hover:brightness-110 cursor-pointer transition-all',
   past: 'bg-surface-container-low border border-outline-variant/30 text-on-surface-variant/40',
   outside: 'bg-transparent text-on-surface-variant/20',
 }
 
-function AvailabilityCalendar({ bookedDates = [], selectable = false, selectedDate = null, onSelectDate }) {
+function AvailabilityCalendar({
+  bookedDates = [],
+  selectable = false,
+  selectedDate = null,
+  onSelectDate,
+  editable = false,
+  onToggleBlock,
+  togglingDate = null,
+}) {
   const today = startOfDay(new Date())
   const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1)
   const [viewDate, setViewDate] = useState(currentMonthStart)
@@ -66,13 +76,33 @@ function AvailabilityCalendar({ bookedDates = [], selectable = false, selectedDa
     setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))
   }
 
+  const findBooking = (iso) => bookedDates.find((b) => b.date === iso)
+
   const cellState = (cell) => {
     if (!cell.inMonth) return 'outside'
     if (cell.date < today) return 'past'
     const iso = toISODate(cell.date)
-    if (bookedDates.includes(iso)) return 'booked'
+    const booking = findBooking(iso)
+    if (booking) {
+      return editable && booking.source === 'Manual' ? 'booked-editable' : 'booked'
+    }
     if (selectedDate === iso) return 'selected'
+    if (editable) return 'available-selectable'
     return selectable ? 'available-selectable' : 'available'
+  }
+
+  const handleCellClick = (cell) => {
+    const iso = toISODate(cell.date)
+    if (editable) {
+      const booking = findBooking(iso)
+      if (booking && booking.source === 'Manual') {
+        onToggleBlock?.(iso, true)
+      } else if (!booking) {
+        onToggleBlock?.(iso, false)
+      }
+      return
+    }
+    onSelectDate?.(iso)
   }
 
   return (
@@ -101,6 +131,13 @@ function AvailabilityCalendar({ bookedDates = [], selectable = false, selectedDa
         </div>
       </div>
 
+      {editable && (
+        <p className="text-[11px] text-on-surface-variant -mt-2 mb-4 flex items-center gap-1.5">
+          <Icon name="info" className="text-[14px]" />
+          Click an available date to block it for offline bookings. Click a gold-outlined booked date to unblock it.
+        </p>
+      )}
+
       <div className="max-w-md mx-auto">
         <div className="grid grid-cols-7 gap-1.5 mb-1.5">
           {WEEKDAYS.map((day) => (
@@ -112,15 +149,14 @@ function AvailabilityCalendar({ bookedDates = [], selectable = false, selectedDa
         <div className="grid grid-cols-7 gap-1.5 mb-5">
           {cells.map((cell, i) => {
             const state = cellState(cell)
-            const className = `h-9 rounded-md flex items-center justify-center text-[12px] ${CELL_STYLES[state]}`
-            if (state === 'available-selectable') {
+            const iso = cell.inMonth ? toISODate(cell.date) : null
+            const isLoading = editable && togglingDate === iso
+            const className = `h-9 rounded-md flex items-center justify-center text-[12px] ${CELL_STYLES[state]} ${
+              isLoading ? 'opacity-50 pointer-events-none' : ''
+            } ${state === 'booked-editable' ? 'ring-2 ring-antique-gold' : ''}`
+            if (state === 'available-selectable' || state === 'booked-editable') {
               return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => onSelectDate?.(toISODate(cell.date))}
-                  className={className}
-                >
+                <button key={i} type="button" onClick={() => handleCellClick(cell)} className={className}>
                   {cell.day}
                 </button>
               )
@@ -147,10 +183,16 @@ function AvailabilityCalendar({ bookedDates = [], selectable = false, selectedDa
           <div className="w-3.5 h-3.5 rounded bg-surface-container-low border border-outline-variant/30" />
           <span className="text-[12px] text-on-surface-variant">Past</span>
         </div>
-        {selectable && (
+        {selectable && !editable && (
           <div className="flex items-center gap-2">
             <div className="w-3.5 h-3.5 rounded bg-antique-gold" />
             <span className="text-[12px] text-on-surface-variant">Selected</span>
+          </div>
+        )}
+        {editable && (
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded bg-primary ring-2 ring-antique-gold" />
+            <span className="text-[12px] text-on-surface-variant">Manually blocked (click to unblock)</span>
           </div>
         )}
       </div>

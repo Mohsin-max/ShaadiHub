@@ -219,6 +219,74 @@ public class VenuesController : ControllerBase
         return Ok(BuildResponse(venue));
     }
 
+    [HttpPost("{id:int}/blocked-dates")]
+    [Authorize(Roles = "VenueOwner")]
+    public async Task<IActionResult> AddBlockedDate(int id, AddBlockedDateDto dto)
+    {
+        var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var venue = await _context.Venues.FirstOrDefaultAsync(v => v.Id == id);
+        if (venue is null)
+        {
+            return NotFound(new { message = "Venue not found." });
+        }
+        if (venue.OwnerId != ownerId)
+        {
+            return Forbid();
+        }
+
+        if (dto.Date < DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            return BadRequest(new { message = "You can't block a date in the past." });
+        }
+
+        var alreadyBooked = await _context.BookingRequests.AnyAsync(b =>
+            b.VenueId == id && b.EventDate == dto.Date && b.Status == BookingStatus.Booked);
+        var alreadyBlocked = await _context.ManualBlockedDates.AnyAsync(m => m.VenueId == id && m.Date == dto.Date);
+        if (alreadyBooked || alreadyBlocked)
+        {
+            return BadRequest(new { message = "That date is already booked for this venue." });
+        }
+
+        _context.ManualBlockedDates.Add(new ManualBlockedDate { VenueId = id, Date = dto.Date });
+        await _context.SaveChangesAsync();
+
+        return Ok(new { date = dto.Date.ToString("yyyy-MM-dd") });
+    }
+
+    [HttpDelete("{id:int}/blocked-dates/{date}")]
+    [Authorize(Roles = "VenueOwner")]
+    public async Task<IActionResult> RemoveBlockedDate(int id, string date)
+    {
+        var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        var venue = await _context.Venues.FirstOrDefaultAsync(v => v.Id == id);
+        if (venue is null)
+        {
+            return NotFound(new { message = "Venue not found." });
+        }
+        if (venue.OwnerId != ownerId)
+        {
+            return Forbid();
+        }
+
+        if (!DateOnly.TryParse(date, out var parsedDate))
+        {
+            return BadRequest(new { message = "Invalid date." });
+        }
+
+        var blocked = await _context.ManualBlockedDates.FirstOrDefaultAsync(m => m.VenueId == id && m.Date == parsedDate);
+        if (blocked is null)
+        {
+            return NotFound(new { message = "That date isn't manually blocked." });
+        }
+
+        _context.ManualBlockedDates.Remove(blocked);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     private VenueResponse BuildResponse(Venue venue)
     {
         var baseUrl = $"{Request.Scheme}://{Request.Host}";

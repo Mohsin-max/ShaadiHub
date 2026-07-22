@@ -23,17 +23,34 @@ function formatTimestamp(value) {
   })
 }
 
+function todayISO() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 function offerLabel(offer, request) {
   const isViewer = offer.offeredBy === request.viewerRole
   if (isViewer) return 'You'
   return offer.offeredBy === 'Client' ? request.clientName : 'Venue Owner'
 }
 
-function NegotiationDetail({ request, venueHref, onRespond, responding, respondError }) {
+function NegotiationDetail({
+  request,
+  venueHref,
+  onRespond,
+  responding,
+  respondError,
+  onCancel,
+  onRequestDateChange,
+  onRespondDateChange,
+}) {
   const [actionMode, setActionMode] = useState(null)
   const [counterPrice, setCounterPrice] = useState('')
   const [counterNote, setCounterNote] = useState('')
   const [rejectReason, setRejectReason] = useState('')
+  const [cancelReason, setCancelReason] = useState('')
+  const [newDate, setNewDate] = useState('')
+  const [dateChangeNote, setDateChangeNote] = useState('')
   const [confirmMode, setConfirmMode] = useState(null)
 
   const cancelAction = () => setActionMode(null)
@@ -70,6 +87,28 @@ function NegotiationDetail({ request, venueHref, onRespond, responding, respondE
       confirmLabel: 'Yes, Reject It',
       variant: 'danger',
     },
+    cancel: {
+      title: 'Confirm Cancellation',
+      details: [
+        { label: 'Venue', value: request.venueName, wide: true },
+        { label: counterpartRoleLabel, value: counterpartLabel },
+        { label: 'Event Date', value: formatDate(request.eventDate) },
+      ],
+      message: `Are you sure you want to cancel this booking? ${counterpartLabel} will see your reason. This can't be undone.`,
+      confirmLabel: 'Yes, Cancel Booking',
+      variant: 'danger',
+    },
+    acceptDateChange: {
+      title: 'Confirm New Date',
+      details: [
+        { label: 'Venue', value: request.venueName, wide: true },
+        { label: 'Current Date', value: formatDate(request.eventDate) },
+        { label: 'New Date', value: request.pendingNewDate ? formatDate(request.pendingNewDate) : '' },
+      ],
+      message: 'Do you want to move this booking to the new date requested?',
+      confirmLabel: 'Yes, Update Date',
+      variant: 'primary',
+    },
   }[confirmMode] || {}
 
   const handleConfirm = () => {
@@ -77,8 +116,21 @@ function NegotiationDetail({ request, venueHref, onRespond, responding, respondE
       onRespond('Accept', {})
     } else if (confirmMode === 'reject') {
       onRespond('Reject', { note: rejectReason.trim() })
+    } else if (confirmMode === 'cancel') {
+      onCancel(cancelReason.trim())
+      setActionMode(null)
+    } else if (confirmMode === 'acceptDateChange') {
+      onRespondDateChange('Accept')
     }
     setConfirmMode(null)
+  }
+
+  const submitDateChangeRequest = () => {
+    if (!newDate) return
+    onRequestDateChange(newDate, dateChangeNote.trim() || null)
+    setActionMode(null)
+    setNewDate('')
+    setDateChangeNote('')
   }
 
   return (
@@ -167,11 +219,20 @@ function NegotiationDetail({ request, venueHref, onRespond, responding, respondE
         </div>
       )}
 
-      {request.status === 'Booked' && request.contactInfo && (
+      {request.status === 'Cancelled' && (
+        <div className="bg-surface-container-high border border-outline-variant rounded-xl p-4">
+          <p className="text-[12px] font-bold text-on-surface-variant mb-1">
+            Cancelled by {request.cancelledBy === request.viewerRole ? 'you' : counterpartLabel}
+          </p>
+          {request.cancelReason && <p className="text-[13px] text-on-surface">{request.cancelReason}</p>}
+        </div>
+      )}
+
+      {(request.status === 'Booked' || request.status === 'Cancelled') && request.contactInfo && (
         <div className="bg-primary/[0.04] border border-antique-gold/30 rounded-xl p-5">
           <h4 className="font-headline-sm text-[15px] text-primary mb-3 flex items-center gap-2">
             <Icon name="verified" className="text-antique-gold text-[18px]" />
-            Booking Confirmed — Contact Details
+            {request.status === 'Booked' ? 'Booking Confirmed — Contact Details' : 'Contact Details'}
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-white rounded-lg border border-outline-variant p-3">
@@ -191,6 +252,147 @@ function NegotiationDetail({ request, venueHref, onRespond, responding, respondE
               </p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Booked-state actions: date change + cancel */}
+      {request.status === 'Booked' && (
+        <div className="bg-white rounded-xl border border-outline-variant p-5 shadow-sm space-y-4">
+          <ErrorBanner message={respondError} />
+
+          {request.pendingNewDate && (
+            <div className="bg-antique-gold/10 border border-antique-gold/30 rounded-lg p-4">
+              <p className="text-[12px] font-bold text-primary mb-1 flex items-center gap-1.5">
+                <Icon name="event_repeat" className="text-[16px]" />
+                Date Change Requested
+              </p>
+              <p className="text-[13px] text-on-surface">
+                New date: <span className="font-bold">{formatDate(request.pendingNewDate)}</span>
+              </p>
+              {request.dateChangeNote && (
+                <p className="text-[12px] text-on-surface-variant mt-1">{request.dateChangeNote}</p>
+              )}
+
+              {request.canRespondToDateChange ? (
+                <div className="flex gap-2.5 mt-3">
+                  <Button
+                    variant="primary"
+                    fullWidth={false}
+                    className="px-4"
+                    disabled={responding}
+                    onClick={() => setConfirmMode('acceptDateChange')}
+                  >
+                    Accept New Date
+                  </Button>
+                  <Button
+                    variant="outline"
+                    fullWidth={false}
+                    className="px-4"
+                    disabled={responding}
+                    onClick={() => onRespondDateChange('Reject')}
+                  >
+                    Keep Original Date
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-[12px] text-on-surface-variant mt-2 flex items-center gap-1.5">
+                  <Icon name="hourglass_top" className="text-[14px]" />
+                  Waiting for the venue owner to respond.
+                </p>
+              )}
+            </div>
+          )}
+
+          {actionMode === null && (
+            <div className="flex flex-wrap gap-2.5">
+              {request.canRequestDateChange && (
+                <Button
+                  variant="gold"
+                  fullWidth={false}
+                  className="px-5"
+                  onClick={() => setActionMode('dateChange')}
+                >
+                  <Icon name="event_repeat" className="text-[16px]" /> Request Date Change
+                </Button>
+              )}
+              {request.canCancel && (
+                <Button
+                  variant="outline"
+                  fullWidth={false}
+                  className="px-5 border-error text-error hover:bg-error-container/30"
+                  onClick={() => setActionMode('cancel')}
+                >
+                  <Icon name="cancel" className="text-[16px]" /> Cancel Booking
+                </Button>
+              )}
+            </div>
+          )}
+
+          {actionMode === 'dateChange' && (
+            <div className="space-y-3 pt-3 border-t border-outline-variant">
+              <div className="space-y-1">
+                <label className="block font-bold text-[11px] text-primary uppercase tracking-wider">
+                  New Date
+                </label>
+                <input
+                  type="date"
+                  min={todayISO()}
+                  autoFocus
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-[14px] bg-white border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+                />
+              </div>
+              <textarea
+                rows={2}
+                value={dateChangeNote}
+                onChange={(e) => setDateChangeNote(e.target.value)}
+                placeholder="Optional note for the venue owner…"
+                className="w-full px-3.5 py-2.5 text-[14px] bg-white border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all resize-none"
+              />
+              <div className="flex gap-2.5">
+                <Button variant="outline" fullWidth={false} className="px-5" onClick={cancelAction}>
+                  Never Mind
+                </Button>
+                <Button
+                  variant="primary"
+                  fullWidth={false}
+                  className="px-5"
+                  disabled={responding || !newDate}
+                  onClick={submitDateChangeRequest}
+                >
+                  {responding ? 'Sending…' : 'Send Date Change Request'}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {actionMode === 'cancel' && (
+            <div className="space-y-3 pt-3 border-t border-outline-variant">
+              <textarea
+                rows={2}
+                autoFocus
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Reason for cancelling (required)…"
+                className="w-full px-3.5 py-2.5 text-[14px] bg-white border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all resize-none"
+              />
+              <div className="flex gap-2.5">
+                <Button variant="outline" fullWidth={false} className="px-5" onClick={cancelAction}>
+                  Never Mind
+                </Button>
+                <Button
+                  variant="danger"
+                  fullWidth={false}
+                  className="px-5"
+                  disabled={responding || !cancelReason.trim()}
+                  onClick={() => setConfirmMode('cancel')}
+                >
+                  Cancel Booking
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
