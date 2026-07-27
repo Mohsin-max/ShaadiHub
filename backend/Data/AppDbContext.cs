@@ -2,6 +2,7 @@ using System.Text.Json;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace backend.Data;
 
@@ -17,6 +18,30 @@ public class AppDbContext : DbContext
     public DbSet<BookingRequest> BookingRequests => Set<BookingRequest>();
     public DbSet<BookingOffer> BookingOffers => Set<BookingOffer>();
     public DbSet<ManualBlockedDate> ManualBlockedDates => Set<ManualBlockedDate>();
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        // MySQL/Pomelo returns DateTime columns with Kind=Unspecified, but every DateTime we
+        // write is DateTime.UtcNow — without this, JSON serialization omits the "Z" suffix and
+        // browsers misinterpret the timestamp as local time instead of UTC.
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<DateTime?>().HaveConversion<UtcNullableDateTimeConverter>();
+    }
+
+    private class UtcDateTimeConverter : ValueConverter<DateTime, DateTime>
+    {
+        public UtcDateTimeConverter() : base(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+        {
+        }
+    }
+
+    private class UtcNullableDateTimeConverter : ValueConverter<DateTime?, DateTime?>
+    {
+        public UtcNullableDateTimeConverter()
+            : base(v => v, v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v)
+        {
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
