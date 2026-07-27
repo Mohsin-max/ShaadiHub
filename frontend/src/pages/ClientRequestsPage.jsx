@@ -4,6 +4,7 @@ import PageFooter from '../components/layout/PageFooter'
 import BookingRequestRow from '../components/ui/BookingRequestRow'
 import EmptyStateCard from '../components/ui/EmptyStateCard'
 import { useAuth } from '../context/AuthContext'
+import useBookingRequestChangeSignal from '../hooks/useBookingRequestChangeSignal'
 import { listMyBookingRequests } from '../utils/api'
 
 const FOOTER_LINKS = [
@@ -32,12 +33,24 @@ function ClientRequestsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  useEffect(() => {
+  const fetchRequests = () => {
     listMyBookingRequests(user?.token)
       .then(setRequests)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
-  }, [user?.token])
+  }
+
+  useEffect(fetchRequests, [user?.token])
+
+  useBookingRequestChangeSignal(() => fetchRequests())
+
+  // Re-render periodically so "New" tags and relative timestamps stay accurate
+  // even if nothing changes for a while.
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="bg-background text-on-surface font-body-md min-h-screen flex flex-col">

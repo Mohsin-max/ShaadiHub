@@ -6,6 +6,7 @@ import NegotiationDetail from '../components/ui/NegotiationDetail'
 import BookingSuccessModal from '../components/ui/BookingSuccessModal'
 import Icon from '../components/ui/Icon'
 import { useAuth } from '../context/AuthContext'
+import useBookingRequestChangeSignal from '../hooks/useBookingRequestChangeSignal'
 import {
   getBookingRequest,
   respondBookingRequest,
@@ -38,6 +39,12 @@ function ClientRequestDetailPage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [id, user?.token])
+
+  useBookingRequestChangeSignal((changedId) => {
+    if (String(changedId) === String(id)) {
+      getBookingRequest(id, user?.token).then(setRequest).catch(() => {})
+    }
+  })
 
   const handleRespond = async (action, payload) => {
     setResponding(true)

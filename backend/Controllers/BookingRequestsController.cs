@@ -70,7 +70,7 @@ public class BookingRequestsController : ControllerBase
         await _context.SaveChangesAsync();
 
         var created = await LoadFullAsync(request.Id);
-        await PushNotificationCountAsync(venue.OwnerId, "VenueOwner");
+        await PushNotificationCountAsync(venue.OwnerId, "VenueOwner", request.Id);
         return Ok(BuildResponse(created!, viewerIsOwner: false));
     }
 
@@ -131,10 +131,12 @@ public class BookingRequestsController : ControllerBase
         return 0;
     }
 
-    private async Task PushNotificationCountAsync(int userId, string role)
+    private async Task PushNotificationCountAsync(int userId, string role, int requestId)
     {
         var count = await GetNotificationCountAsync(userId, role);
-        await _hub.Clients.User(userId.ToString()).SendAsync("notificationCount", count);
+        var connection = _hub.Clients.User(userId.ToString());
+        await connection.SendAsync("notificationCount", count);
+        await connection.SendAsync("bookingRequestChanged", requestId);
     }
 
     [HttpGet("{id:int}")]
@@ -165,7 +167,7 @@ public class BookingRequestsController : ControllerBase
             request.OwnerViewedAt = DateTime.UtcNow;
         }
         await _context.SaveChangesAsync();
-        await PushNotificationCountAsync(userId, isOwner ? "VenueOwner" : "Client");
+        await PushNotificationCountAsync(userId, isOwner ? "VenueOwner" : "Client", id);
 
         return Ok(BuildResponse(request, viewerIsOwner: isOwner));
     }
@@ -253,8 +255,8 @@ public class BookingRequestsController : ControllerBase
         await _context.SaveChangesAsync();
 
         var updated = await LoadFullAsync(id);
-        await PushNotificationCountAsync(request.ClientId, "Client");
-        await PushNotificationCountAsync(request.Venue.OwnerId, "VenueOwner");
+        await PushNotificationCountAsync(request.ClientId, "Client", id);
+        await PushNotificationCountAsync(request.Venue.OwnerId, "VenueOwner", id);
         return Ok(BuildResponse(updated!, viewerIsOwner: isOwner));
     }
 
@@ -302,8 +304,8 @@ public class BookingRequestsController : ControllerBase
         await _context.SaveChangesAsync();
 
         var updated = await LoadFullAsync(id);
-        await PushNotificationCountAsync(request.ClientId, "Client");
-        await PushNotificationCountAsync(request.Venue.OwnerId, "VenueOwner");
+        await PushNotificationCountAsync(request.ClientId, "Client", id);
+        await PushNotificationCountAsync(request.Venue.OwnerId, "VenueOwner", id);
         return Ok(BuildResponse(updated!, viewerIsOwner: isOwner));
     }
 
@@ -356,7 +358,7 @@ public class BookingRequestsController : ControllerBase
         await _context.SaveChangesAsync();
 
         var updated = await LoadFullAsync(id);
-        await PushNotificationCountAsync(request.Venue.OwnerId, "VenueOwner");
+        await PushNotificationCountAsync(request.Venue.OwnerId, "VenueOwner", id);
         return Ok(BuildResponse(updated!, viewerIsOwner: false));
     }
 
@@ -403,7 +405,7 @@ public class BookingRequestsController : ControllerBase
         await _context.SaveChangesAsync();
 
         var updated = await LoadFullAsync(id);
-        await PushNotificationCountAsync(request.ClientId, "Client");
+        await PushNotificationCountAsync(request.ClientId, "Client", id);
         return Ok(BuildResponse(updated!, viewerIsOwner: true));
     }
 

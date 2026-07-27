@@ -6,6 +6,7 @@ import BookingRequestRow from '../components/ui/BookingRequestRow'
 import EmptyStateCard from '../components/ui/EmptyStateCard'
 import Icon from '../components/ui/Icon'
 import { useAuth } from '../context/AuthContext'
+import useBookingRequestChangeSignal from '../hooks/useBookingRequestChangeSignal'
 import { listReceivedBookingRequests } from '../utils/api'
 
 function RowSkeleton() {
@@ -27,12 +28,24 @@ function ProviderInquiriesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  useEffect(() => {
+  const fetchRequests = () => {
     listReceivedBookingRequests(user?.token)
       .then(setRequests)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
-  }, [user?.token])
+  }
+
+  useEffect(fetchRequests, [user?.token])
+
+  useBookingRequestChangeSignal(() => fetchRequests())
+
+  // Re-render periodically so "New" tags and relative timestamps stay accurate
+  // even if nothing changes for a while.
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="flex min-h-screen bg-background text-on-surface font-body-md">
