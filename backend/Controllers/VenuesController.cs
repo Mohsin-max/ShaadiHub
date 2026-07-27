@@ -164,7 +164,9 @@ public class VenuesController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> List([FromQuery] string[]? city, [FromQuery] string[]? area, [FromQuery] string[]? type)
     {
-        var query = _context.Venues.Include(v => v.Owner).Include(v => v.Images).AsQueryable();
+        var query = _context.Venues.Include(v => v.Owner).Include(v => v.Images)
+            .Where(v => v.IsActive)
+            .AsQueryable();
 
         if (city is { Length: > 0 })
         {

@@ -84,6 +84,11 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid email or password." });
         }
 
+        if (!user.IsActive)
+        {
+            return Unauthorized(new { message = "This account has been deactivated. Please contact support." });
+        }
+
         return Ok(BuildAuthResponse(user));
     }
 

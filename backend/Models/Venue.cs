@@ -29,5 +29,7 @@ public class Venue
     public List<string> Amenities { get; set; } = new();
     public List<VenueImage> Images { get; set; } = new();
 
+    public bool IsActive { get; set; } = true;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

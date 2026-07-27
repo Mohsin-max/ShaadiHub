@@ -4,14 +4,14 @@ import { useAuth } from '../../context/AuthContext'
 const ROLE_HOME = {
   Client: '/venues',
   VenueOwner: '/provider/dashboard',
-  Admin: '/venues',
+  Admin: '/admin/dashboard',
 }
 
-function ProtectedRoute({ allowedRoles, children }) {
+function ProtectedRoute({ allowedRoles, children, loginPath = '/login' }) {
   const { user } = useAuth()
 
   if (!user) {
-    return <Navigate to="/login" replace />
+    return <Navigate to={loginPath} replace />
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {

@@ -149,3 +149,36 @@ export function removeBlockedDate(venueId, date, token) {
     headers: authHeaders(token),
   })
 }
+
+export function getAdminDashboard(token) {
+  return request('/admin/dashboard', { headers: authHeaders(token) })
+}
+
+export function listAdminVenueOwners(token) {
+  return request('/admin/venue-owners', { headers: authHeaders(token) })
+}
+
+export function listAdminClients(token) {
+  return request('/admin/clients', { headers: authHeaders(token) })
+}
+
+export function listAdminVenues(search, token) {
+  const query = search ? `?search=${encodeURIComponent(search)}` : ''
+  return request(`/admin/venues${query}`, { headers: authHeaders(token) })
+}
+
+export function setAdminVenueStatus(id, isActive, token) {
+  return request(`/admin/venues/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ isActive }),
+    headers: authHeaders(token),
+  })
+}
+
+export function setAdminUserStatus(id, isActive, token) {
+  return request(`/admin/users/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ isActive }),
+    headers: authHeaders(token),
+  })
+}

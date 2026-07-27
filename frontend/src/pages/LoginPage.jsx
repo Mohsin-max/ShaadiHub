@@ -17,7 +17,7 @@ const HERO_IMAGE =
 const ROLE_REDIRECT = {
   Client: '/venues',
   VenueOwner: '/provider/dashboard',
-  Admin: '/venues',
+  Admin: '/admin/dashboard',
 }
 
 function LoginPage() {

@@ -48,7 +48,20 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.Property(u => u.Role).HasConversion<string>().HasMaxLength(20);
+            entity.Property(u => u.IsActive).HasDefaultValue(true);
             entity.HasIndex(u => u.Email).IsUnique();
+
+            // Seeded platform admin account — there is no self-service admin signup by design.
+            entity.HasData(new User
+            {
+                Id = 999,
+                Role = UserRole.Admin,
+                Email = "admin@shaadihub.pk",
+                PasswordHash = "$2a$11$qpMyC844PVglx4jHV9NTrejydUpgBnYgwscOVb9tWEmMqlugvoPSe",
+                Name = "Platform Admin",
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            });
         });
 
         modelBuilder.Entity<Venue>(entity =>
@@ -61,6 +74,7 @@ public class AppDbContext : DbContext
             entity.Property(v => v.Price).HasColumnType("decimal(12,2)");
             entity.Property(v => v.WeekendPrice).HasColumnType("decimal(12,2)");
             entity.Property(v => v.SpecialEntryPrice).HasColumnType("decimal(12,2)");
+            entity.Property(v => v.IsActive).HasDefaultValue(true);
 
             var amenitiesComparer = new ValueComparer<List<string>>(
                 (a, b) => (a ?? new()).SequenceEqual(b ?? new()),

@@ -11,6 +11,11 @@ import ClientRequestsPage from './pages/ClientRequestsPage'
 import ClientRequestDetailPage from './pages/ClientRequestDetailPage'
 import ProviderInquiriesPage from './pages/ProviderInquiriesPage'
 import ProviderInquiryDetailPage from './pages/ProviderInquiryDetailPage'
+import AdminLoginPage from './pages/AdminLoginPage'
+import AdminDashboardPage from './pages/AdminDashboardPage'
+import AdminVenueOwnersPage from './pages/AdminVenueOwnersPage'
+import AdminClientsPage from './pages/AdminClientsPage'
+import AdminVenuesPage from './pages/AdminVenuesPage'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 
 function App() {
@@ -75,6 +80,39 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['Client']}>
             <ClientRequestDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={['Admin']} loginPath="/admin/login">
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/venue-owners"
+        element={
+          <ProtectedRoute allowedRoles={['Admin']} loginPath="/admin/login">
+            <AdminVenueOwnersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/clients"
+        element={
+          <ProtectedRoute allowedRoles={['Admin']} loginPath="/admin/login">
+            <AdminClientsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/venues"
+        element={
+          <ProtectedRoute allowedRoles={['Admin']} loginPath="/admin/login">
+            <AdminVenuesPage />
           </ProtectedRoute>
         }
       />
