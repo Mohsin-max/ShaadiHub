@@ -7,7 +7,6 @@ import VenueGallery from '../components/ui/VenueGallery'
 import AmenitiesGrid from '../components/ui/AmenitiesGrid'
 import AvailabilityCalendar from '../components/ui/AvailabilityCalendar'
 import ProviderCard from '../components/ui/ProviderCard'
-import PriceSummaryCard from '../components/ui/PriceSummaryCard'
 import OwnerActionCard from '../components/ui/OwnerActionCard'
 import BookingRequestModal from '../components/ui/BookingRequestModal'
 import PhoneNumberModal from '../components/ui/PhoneNumberModal'
@@ -56,7 +55,6 @@ function VenueDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
-  const [specialEntrySelected, setSpecialEntrySelected] = useState(false)
   const [bookedDates, setBookedDates] = useState([])
   const [selectedDate, setSelectedDate] = useState(null)
   const [phoneModalOpen, setPhoneModalOpen] = useState(false)
@@ -103,18 +101,6 @@ function VenueDetailPage() {
       return
     }
     setSelectedDate(dateStr)
-    setModalOpen(true)
-  }
-
-  const handleSendRequest = () => {
-    if (!user) {
-      navigate('/login')
-      return
-    }
-    if (needsPhone) {
-      setPhoneModalOpen(true)
-      return
-    }
     setModalOpen(true)
   }
 
@@ -367,20 +353,10 @@ function VenueDetailPage() {
 
             {/* Right Sidebar */}
             <div className="space-y-5">
-              <PriceSummaryCard
-                venue={venue}
-                specialEntrySelected={specialEntrySelected}
-                onToggleSpecialEntry={setSpecialEntrySelected}
-              />
               {isOwner ? (
                 <OwnerActionCard venueId={venue.id} />
               ) : (
-                <ProviderCard
-                  name={venue.ownerName}
-                  role="Venue Owner"
-                  photo={null}
-                  onSendRequest={handleSendRequest}
-                />
+                <ProviderCard name={venue.ownerName} role="Venue Owner" photo={null} />
               )}
             </div>
           </div>
@@ -392,10 +368,13 @@ function VenueDetailPage() {
       {!isOwner && (
         <BookingRequestModal
           open={modalOpen}
-          onClose={() => setModalOpen(false)}
+          onClose={() => {
+            setModalOpen(false)
+            setSelectedDate(null)
+          }}
           venueId={venue.id}
           venueName={venue.name}
-          initialPrice={venue.price + (specialEntrySelected ? Number(venue.specialEntryPrice || 0) : 0)}
+          initialPrice={venue.price}
           preselectedDate={selectedDate}
           bookedDates={bookedDates}
           token={user?.token}

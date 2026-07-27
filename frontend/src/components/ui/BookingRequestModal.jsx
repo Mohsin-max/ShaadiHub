@@ -5,9 +5,13 @@ import FormField from './FormField'
 import ErrorBanner from './ErrorBanner'
 import { createBookingRequest } from '../../utils/api'
 
-function todayISO() {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+function formatDate(value) {
+  if (!value) return ''
+  return new Date(`${value}T00:00:00`).toLocaleDateString('en-PK', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 }
 
 function BookingRequestModal({
@@ -21,7 +25,6 @@ function BookingRequestModal({
   token,
   onSuccess,
 }) {
-  const [selectedDate, setSelectedDate] = useState('')
   const [price, setPrice] = useState('')
   const [note, setNote] = useState('')
   const [priceTouched, setPriceTouched] = useState(false)
@@ -30,10 +33,9 @@ function BookingRequestModal({
 
   useEffect(() => {
     if (open) {
-      setSelectedDate(preselectedDate || '')
       setError('')
     }
-  }, [open, preselectedDate])
+  }, [open])
 
   if (!open) return null
 
@@ -41,8 +43,8 @@ function BookingRequestModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (bookedDates.some((b) => b.date === selectedDate)) {
-      setError('That date is already booked for this venue — please pick another.')
+    if (bookedDates.some((b) => b.date === preselectedDate)) {
+      setError('That date is already booked for this venue — please cancel and pick another.')
       return
     }
     setError('')
@@ -50,11 +52,10 @@ function BookingRequestModal({
     try {
       const created = await createBookingRequest(
         venueId,
-        { eventDate: selectedDate, offerPrice: Number(displayPrice), note: note.trim() || null },
+        { eventDate: preselectedDate, offerPrice: Number(displayPrice), note: note.trim() || null },
         token,
       )
       onClose()
-      setSelectedDate('')
       setPrice('')
       setPriceTouched(false)
       setNote('')
@@ -93,37 +94,37 @@ function BookingRequestModal({
 
           <div className="space-y-1">
             <label className="block font-bold text-[11px] text-primary uppercase tracking-wider">
-              Preferred Date
+              Event Date
             </label>
-            <div className="relative">
-              <Icon
-                name="calendar_month"
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-primary text-[18px] pointer-events-none"
-              />
-              <input
-                type="date"
-                required
-                min={todayISO()}
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full pl-10 pr-3.5 py-2.5 text-[14px] bg-white border border-outline-variant rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
-              />
+            <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg">
+              <Icon name="calendar_month" className="text-primary text-[18px] shrink-0" />
+              <span className="text-[14px] font-semibold text-on-surface">{formatDate(preselectedDate)}</span>
             </div>
+            <p className="text-[11px] text-on-surface-variant">
+              Want a different date? Cancel and select another one on the calendar.
+            </p>
           </div>
 
-          <FormField
-            label="Proposed Offer Price (PKR)"
-            prefix="Rs."
-            type="number"
-            placeholder="e.g. 450,000"
-            required
-            min={0}
-            value={displayPrice}
-            onChange={(e) => {
-              setPriceTouched(true)
-              setPrice(e.target.value)
-            }}
-          />
+          <div>
+            <FormField
+              label="Proposed Offer Price (PKR)"
+              prefix="Rs."
+              type="number"
+              placeholder="e.g. 450,000"
+              required
+              min={0}
+              value={displayPrice}
+              onChange={(e) => {
+                setPriceTouched(true)
+                setPrice(e.target.value)
+              }}
+            />
+            {displayPrice && !Number.isNaN(Number(displayPrice)) && (
+              <p className="text-[12px] text-antique-gold font-semibold mt-1">
+                Rs. {Number(displayPrice).toLocaleString('en-PK')}
+              </p>
+            )}
+          </div>
 
           <div className="space-y-1">
             <label className="block font-bold text-[11px] text-primary uppercase tracking-wider">

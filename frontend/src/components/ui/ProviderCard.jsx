@@ -1,7 +1,6 @@
 import Icon from './Icon'
-import Button from './Button'
 
-function ProviderCard({ name, role, photo, onSendRequest }) {
+function ProviderCard({ name, role, photo }) {
   return (
     <div className="bg-white p-5 rounded-xl border border-outline-variant shadow-[0px_4px_12px_rgba(75,44,94,0.08)]">
       <h4 className="font-headline-sm text-[18px] text-primary mb-5">Venue Provider</h4>
@@ -27,12 +26,13 @@ function ProviderCard({ name, role, photo, onSendRequest }) {
         </div>
       </div>
 
-      <Button variant="primary" onClick={onSendRequest}>
-        Send Booking Request
-      </Button>
-      <p className="text-center text-[11px] text-on-surface-variant mt-3">
-        Typically responds within 2 hours
-      </p>
+      <div className="flex items-start gap-2.5 bg-antique-gold/10 border border-antique-gold/30 rounded-lg p-3.5">
+        <Icon name="touch_app" className="text-antique-gold text-[18px] shrink-0" />
+        <p className="text-[12px] text-on-surface leading-relaxed">
+          <span className="font-bold">Select a date</span> on the availability calendar below to send this venue
+          a booking request.
+        </p>
+      </div>
     </div>
   )
 }
