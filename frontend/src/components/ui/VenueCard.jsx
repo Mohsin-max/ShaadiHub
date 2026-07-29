@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import Icon from './Icon'
-import useFavorites from '../../hooks/useFavorites'
+import { useFavorites } from '../../context/FavoritesContext'
 
 function formatPrice(value) {
   return `Rs. ${Number(value).toLocaleString('en-PK')}`

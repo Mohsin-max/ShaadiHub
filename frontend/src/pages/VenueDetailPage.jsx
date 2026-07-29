@@ -12,7 +12,7 @@ import BookingRequestModal from '../components/ui/BookingRequestModal'
 import PhoneNumberModal from '../components/ui/PhoneNumberModal'
 import VenueDetailSkeleton from '../components/ui/VenueDetailSkeleton'
 import { useAuth } from '../context/AuthContext'
-import useFavorites from '../hooks/useFavorites'
+import { useFavorites } from '../context/FavoritesContext'
 import {
   getVenue,
   getBookedDates,
@@ -202,6 +202,14 @@ function VenueDetailPage() {
 
       <main className="pt-14 flex-1">
         <div className="max-w-[1280px] mx-auto px-5 md:px-6 pt-8 pb-16">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 text-[13px] font-semibold text-on-surface-variant hover:text-primary transition-colors mb-4"
+          >
+            <Icon name="arrow_back" className="text-[16px]" />
+            Back to Results
+          </button>
+
           {isOwner && (
             <div className="flex items-center gap-2 text-[12px] font-semibold text-antique-gold bg-antique-gold/10 border border-antique-gold/30 rounded-lg px-3.5 py-2 mb-4">
               <Icon name="visibility" className="text-[16px]" />

@@ -5,7 +5,7 @@ import PageFooter from '../components/layout/PageFooter'
 import VenueCard from '../components/ui/VenueCard'
 import VenueCardSkeleton from '../components/ui/VenueCardSkeleton'
 import EmptyStateCard from '../components/ui/EmptyStateCard'
-import useFavorites from '../hooks/useFavorites'
+import { useFavorites } from '../context/FavoritesContext'
 import { listVenues } from '../utils/api'
 
 function FavoritesPage() {

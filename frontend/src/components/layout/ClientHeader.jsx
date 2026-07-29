@@ -4,6 +4,7 @@ import Icon from '../ui/Icon'
 import NotificationBadge from '../ui/NotificationBadge'
 import { useAuth } from '../../context/AuthContext'
 import useBookingNotificationCount from '../../hooks/useBookingNotificationCount'
+import { useFavorites } from '../../context/FavoritesContext'
 
 const BASE_NAV_ITEMS = [
   { label: 'Browse Venues', to: '/venues' },
@@ -14,6 +15,7 @@ function ClientHeader({ searchValue, onSearchChange }) {
   const { user } = useAuth()
   const [localSearch, setLocalSearch] = useState('')
   const notificationCount = useBookingNotificationCount()
+  const { favoriteIds } = useFavorites()
 
   const isControlled = searchValue !== undefined
   const search = isControlled ? searchValue : localSearch
@@ -49,6 +51,11 @@ function ClientHeader({ searchValue, onSearchChange }) {
             >
               {item.label}
               {item.label === 'My Requests' && <NotificationBadge count={notificationCount} />}
+              {item.label === 'Favorites' && favoriteIds.length > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold leading-none">
+                  {favoriteIds.length > 9 ? '9+' : favoriteIds.length}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
