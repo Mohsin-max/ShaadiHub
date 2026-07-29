@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import PublicHeader from '../components/layout/PublicHeader'
 import PublicFooter from '../components/layout/PublicFooter'
 import AuthLayout from '../components/layout/AuthLayout'
@@ -20,7 +20,8 @@ const ROLE_REDIRECT = {
 }
 
 function SignupPage() {
-  const [activeForm, setActiveForm] = useState('client')
+  const [searchParams] = useSearchParams()
+  const [activeForm, setActiveForm] = useState(searchParams.get('role') === 'provider' ? 'provider' : 'client')
   const [clientForm, setClientForm] = useState({
     firstName: '',
     lastName: '',
