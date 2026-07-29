@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import SignupPage from './pages/SignupPage'
 import LoginPage from './pages/LoginPage'
 import ProviderDashboardPage from './pages/ProviderDashboardPage'
@@ -11,17 +11,19 @@ import ClientRequestsPage from './pages/ClientRequestsPage'
 import ClientRequestDetailPage from './pages/ClientRequestDetailPage'
 import ProviderInquiriesPage from './pages/ProviderInquiriesPage'
 import ProviderInquiryDetailPage from './pages/ProviderInquiryDetailPage'
+import AccountSettingsPage from './pages/AccountSettingsPage'
 import AdminLoginPage from './pages/AdminLoginPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import AdminVenueOwnersPage from './pages/AdminVenueOwnersPage'
 import AdminClientsPage from './pages/AdminClientsPage'
 import AdminVenuesPage from './pages/AdminVenuesPage'
 import ProtectedRoute from './components/auth/ProtectedRoute'
+import RootRedirect from './components/auth/RootRedirect'
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/signup" replace />} />
+      <Route path="/" element={<RootRedirect />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route
@@ -80,6 +82,14 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={['Client']}>
             <ClientRequestDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/account/settings"
+        element={
+          <ProtectedRoute allowedRoles={['Client', 'VenueOwner']}>
+            <AccountSettingsPage />
           </ProtectedRoute>
         }
       />

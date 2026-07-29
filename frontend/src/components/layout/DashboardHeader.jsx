@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import Icon from '../ui/Icon'
 import { useAuth } from '../../context/AuthContext'
 
@@ -15,15 +16,13 @@ function DashboardHeader() {
         </p>
       </div>
       <div className="flex items-center gap-2.5">
-        <button className="p-1.5 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors relative">
-          <Icon name="notifications" className="text-[20px]" />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-error rounded-full border-2 border-background" />
-        </button>
-        <div className="h-5 w-px bg-outline-variant" />
-        <button className="flex items-center gap-1.5 font-semibold text-primary hover:text-secondary transition-colors">
+        <Link
+          to="/account/settings"
+          className="flex items-center gap-1.5 font-semibold text-primary hover:text-secondary transition-colors"
+        >
           <Icon name="account_circle" className="text-[20px]" />
           <span className="hidden sm:block text-[13px]">My Profile</span>
-        </button>
+        </Link>
       </div>
     </header>
   )

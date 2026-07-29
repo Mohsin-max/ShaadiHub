@@ -10,15 +10,10 @@ import Divider from '../components/ui/Divider'
 import Icon from '../components/ui/Icon'
 import ErrorBanner from '../components/ui/ErrorBanner'
 import { useAuth } from '../context/AuthContext'
+import { roleHome } from '../utils/roleHome'
 
 const HERO_IMAGE =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuAwvZpBFL9aDvrLFc-VZZPbPGrm2ZDLpS-0vf4zUj2g3IgqTBPSPZ1uBZLfLdAyEjBBqfncOHrjLmlfr43kddRxZDPcBsrB6NQsNmh0Itoyjdg5oXZjfWeT3AWp1S3lSBopIqbTqluHBztnq30JWEGh57u5DolAeMyD3X7rf1GIIbzfC47HwCPEETL59Fea7k4Z7J-4E5GroXCiloFAUfqJpZT9YhRUqEKCeISXpcZbvTqix2Y7kPOy2YCI5Lh5MAotGvO1VH_nbwY'
-
-const ROLE_REDIRECT = {
-  Client: '/venues',
-  VenueOwner: '/provider/dashboard',
-  Admin: '/admin/dashboard',
-}
 
 function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' })
@@ -36,7 +31,7 @@ function LoginPage() {
     setLoading(true)
     try {
       const result = await login(form)
-      navigate(ROLE_REDIRECT[result.role] || '/venues')
+      navigate(roleHome(result.role))
     } catch (err) {
       setError(err.message)
     } finally {

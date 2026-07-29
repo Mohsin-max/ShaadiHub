@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { icon: 'mail', label: 'Inquiries', to: '/provider/inquiries' },
   { icon: 'event_available', label: 'Bookings', to: '#' },
   { icon: 'payments', label: 'Earnings', to: '#' },
-  { icon: 'settings', label: 'Settings', to: '#' },
+  { icon: 'settings', label: 'Settings', to: '/account/settings' },
 ]
 
 const BROWSE_ITEM = { icon: 'travel_explore', label: 'Browse Venues', to: '/venues' }

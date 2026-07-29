@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import Icon from '../ui/Icon'
 import NotificationBadge from '../ui/NotificationBadge'
 import { useAuth } from '../../context/AuthContext'
@@ -10,12 +10,8 @@ const BASE_NAV_ITEMS = [
   { label: 'Favorites', to: '/favorites' },
 ]
 
-const AVATAR_IMAGE =
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuAd3lpSQDoU_3gmMFUvFJ97LcWxuhZnI4HBFFyZDIcHnCcKq51qp88JYvZTWxpg31NUOnF3GSfyUbK48JYZJSSVv58V2SU6nDGcVt06d_iHzsGXI-a35c1Fk6eepVfVikrtpvmYBOf05cMO2gpRnceM9SMksjX7ljxBDyOhGf5t3dhtuLmWPYiyVB9ll6bjSa9A8w_YmTywwKVsz7ooM3zCQVTjkvFKF52DmpBWjzpxZ2f8YGUrmWWah9tbu3jVWHMkhSu1Q4-q4g'
-
 function ClientHeader({ searchValue, onSearchChange }) {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
+  const { user } = useAuth()
   const [localSearch, setLocalSearch] = useState('')
   const notificationCount = useBookingNotificationCount()
 
@@ -25,11 +21,6 @@ function ClientHeader({ searchValue, onSearchChange }) {
   const handleSearchChange = (e) => {
     if (isControlled) onSearchChange?.(e.target.value)
     else setLocalSearch(e.target.value)
-  }
-
-  const handleLogout = () => {
-    logout()
-    navigate('/login')
   }
 
   const navItems =
@@ -90,31 +81,19 @@ function ClientHeader({ searchValue, onSearchChange }) {
           </Link>
         )}
 
-        <Link
-          to={user?.role === 'Client' ? '/my-requests' : user?.role === 'VenueOwner' ? '/provider/inquiries' : '#'}
-          className="relative p-1.5 text-on-surface-variant hover:text-primary transition-colors"
-        >
-          <Icon name="notifications" className="text-[20px]" />
-          {notificationCount > 0 && (
-            <span className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-error ring-2 ring-background" />
-          )}
-        </Link>
-
         {user ? (
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-full bg-secondary-fixed flex items-center justify-center overflow-hidden border border-outline-variant">
-              <img className="w-full h-full object-cover" src={AVATAR_IMAGE} alt="" />
-            </div>
+          <Link
+            to="/account/settings"
+            className="flex items-center gap-2 pl-1 pr-1 py-1 rounded-full hover:bg-surface-container-low transition-colors"
+            title="Account Settings"
+          >
             <span className="hidden md:block text-[13px] font-semibold text-primary">
               {user.displayName}
             </span>
-            <button
-              onClick={handleLogout}
-              className="text-[12px] font-semibold text-on-surface-variant hover:text-error transition-colors ml-1"
-            >
-              Logout
-            </button>
-          </div>
+            <span className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-outline-variant">
+              <Icon name="person" className="text-[18px]" />
+            </span>
+          </Link>
         ) : (
           <Link
             to="/login"
