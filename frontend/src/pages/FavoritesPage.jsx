@@ -1,40 +1,54 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ClientHeader from '../components/layout/ClientHeader'
-import FilterSidebar from '../components/layout/FilterSidebar'
 import PageFooter from '../components/layout/PageFooter'
+import VenueCard from '../components/ui/VenueCard'
+import VenueCardSkeleton from '../components/ui/VenueCardSkeleton'
 import EmptyStateCard from '../components/ui/EmptyStateCard'
-
-const FOOTER_LINKS = [
-  { label: 'About', href: '#' },
-  { label: 'Contact', href: '#' },
-  { label: 'Terms', href: '#' },
-  { label: 'Privacy', href: '#' },
-]
-
-// No backend/state wiring yet — favorites always render empty in this UI-only phase.
-const favoriteVenues = []
+import useFavorites from '../hooks/useFavorites'
+import { listVenues } from '../utils/api'
 
 function FavoritesPage() {
   const navigate = useNavigate()
+  const { favoriteIds } = useFavorites()
+  const [venues, setVenues] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    listVenues()
+      .then(setVenues)
+      .catch(() => setVenues([]))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const favoriteVenues = venues.filter((v) => favoriteIds.includes(v.id))
 
   return (
     <div className="bg-background text-on-surface font-body-md min-h-screen flex flex-col">
       <ClientHeader />
 
-      <main className="pt-14 flex-1 flex">
-        <FilterSidebar />
-
-        <section className="flex-1 ml-0 md:ml-[282px] p-5 md:p-6">
+      <main className="pt-14 flex-1">
+        <div className="max-w-[1280px] mx-auto p-5 md:p-6">
           <div className="mb-5">
             <h1 className="font-headline-md text-[24px] text-primary mb-0.5">Your Favorites</h1>
             <p className="text-[13px] text-on-surface-variant">
-              {favoriteVenues.length === 0
-                ? 'No saved venues yet'
-                : `${favoriteVenues.length} saved venues`}
+              {loading
+                ? 'Loading your saved venues…'
+                : favoriteVenues.length === 0
+                  ? 'No saved venues yet'
+                  : `${favoriteVenues.length} saved venue${favoriteVenues.length === 1 ? '' : 's'}`}
             </p>
           </div>
 
-          {favoriteVenues.length === 0 && (
+          {loading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <VenueCardSkeleton key={i} />
+              ))}
+            </div>
+          )}
+
+          {!loading && favoriteVenues.length === 0 && (
             <div className="max-w-md mx-auto mt-12">
               <EmptyStateCard
                 icon="favorite"
@@ -46,12 +60,18 @@ function FavoritesPage() {
               />
             </div>
           )}
-        </section>
+
+          {!loading && favoriteVenues.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {favoriteVenues.map((venue) => (
+                <VenueCard key={venue.id} venue={venue} />
+              ))}
+            </div>
+          )}
+        </div>
       </main>
 
-      <div className="md:pl-[282px]">
-        <PageFooter links={FOOTER_LINKS} social />
-      </div>
+      <PageFooter />
     </div>
   )
 }

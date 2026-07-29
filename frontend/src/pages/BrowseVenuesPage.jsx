@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import ClientHeader from '../components/layout/ClientHeader'
 import FilterSidebar from '../components/layout/FilterSidebar'
 import PageFooter from '../components/layout/PageFooter'
@@ -24,13 +25,41 @@ function BrowseVenuesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const [searchText, setSearchText] = useState('')
-  const [selectedCity, setSelectedCity] = useState('')
-  const [selectedAreas, setSelectedAreas] = useState([])
-  const [selectedTypes, setSelectedTypes] = useState([])
-  const [capacityMin, setCapacityMin] = useState(0)
-  const [budgetMin, setBudgetMin] = useState('')
-  const [budgetMax, setBudgetMax] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const searchText = searchParams.get('q') || ''
+  const selectedCity = searchParams.get('city') || ''
+  const selectedAreas = useMemo(
+    () => (searchParams.get('areas') ? searchParams.get('areas').split(',').filter(Boolean) : []),
+    [searchParams],
+  )
+  const selectedTypes = useMemo(
+    () => (searchParams.get('types') ? searchParams.get('types').split(',').filter(Boolean) : []),
+    [searchParams],
+  )
+  const capacityMin = Number(searchParams.get('capacity') || 0)
+  const budgetMin = searchParams.get('budgetMin') || ''
+  const budgetMax = searchParams.get('budgetMax') || ''
+
+  const updateParams = (patch) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        Object.entries(patch).forEach(([key, value]) => {
+          const isEmpty =
+            value === '' || value === null || value === undefined || value === 0 ||
+            (Array.isArray(value) && value.length === 0)
+          if (isEmpty) next.delete(key)
+          else if (Array.isArray(value)) next.set(key, value.join(','))
+          else next.set(key, String(value))
+        })
+        return next
+      },
+      { replace: true },
+    )
+  }
+
+  const setSearchText = (value) => updateParams({ q: value })
 
   useEffect(() => {
     listVenues()
@@ -84,17 +113,11 @@ function BrowseVenuesPage() {
   }, [venues, selectedCity, selectedAreas, selectedTypes, capacityMin, budgetMin, budgetMax, searchText])
 
   const handleCityChange = (city) => {
-    setSelectedCity(city)
-    setSelectedAreas([])
+    updateParams({ city, areas: [] })
   }
 
   const clearAll = () => {
-    setSelectedCity('')
-    setSelectedAreas([])
-    setSelectedTypes([])
-    setCapacityMin(0)
-    setBudgetMin('')
-    setBudgetMax('')
+    setSearchParams({}, { replace: true })
   }
 
   return (
@@ -113,11 +136,11 @@ function BrowseVenuesPage() {
           budgetMin={budgetMin}
           budgetMax={budgetMax}
           onCityChange={handleCityChange}
-          onAreaToggle={(area) => setSelectedAreas((prev) => toggleValue(prev, area))}
-          onTypeToggle={(type) => setSelectedTypes((prev) => toggleValue(prev, type))}
-          onCapacityChange={setCapacityMin}
-          onBudgetMinChange={setBudgetMin}
-          onBudgetMaxChange={setBudgetMax}
+          onAreaToggle={(area) => updateParams({ areas: toggleValue(selectedAreas, area) })}
+          onTypeToggle={(type) => updateParams({ types: toggleValue(selectedTypes, type) })}
+          onCapacityChange={(value) => updateParams({ capacity: value })}
+          onBudgetMinChange={(value) => updateParams({ budgetMin: value })}
+          onBudgetMaxChange={(value) => updateParams({ budgetMax: value })}
           onClearAll={clearAll}
         />
 

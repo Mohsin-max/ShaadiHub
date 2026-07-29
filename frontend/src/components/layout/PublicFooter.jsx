@@ -1,16 +1,16 @@
 function PublicFooter() {
   return (
-    <footer className="bg-surface-container-highest border-t border-outline-variant py-8">
+    <footer className="border-t border-outline-variant py-8">
       <div className="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-4 gap-gutter">
         <div className="space-y-2">
-          <span className="font-display-lg text-[18px] text-primary font-bold">ShaadiHub</span>
+          <span className="font-display-lg text-[16px] text-primary font-bold">ShaadiHub</span>
           <p className="text-on-surface-variant text-body-sm leading-relaxed">
             Bridging Traditions with Excellence. Pakistan's most trusted platform for
             high-end wedding planning and venue management.
           </p>
         </div>
         <div>
-          <h4 className="font-bold text-primary mb-3 text-sm">Quick Links</h4>
+          <h4 className="font-bold text-[11px] text-primary uppercase tracking-wider mb-3">Quick Links</h4>
           <ul className="space-y-1.5 text-body-sm text-on-surface-variant">
             <li>
               <a className="hover:text-secondary transition-colors" href="#">
@@ -35,7 +35,7 @@ function PublicFooter() {
           </ul>
         </div>
         <div>
-          <h4 className="font-bold text-primary mb-3 text-sm">Legal</h4>
+          <h4 className="font-bold text-[11px] text-primary uppercase tracking-wider mb-3">Legal</h4>
           <ul className="space-y-1.5 text-body-sm text-on-surface-variant">
             <li>
               <a className="hover:text-secondary transition-colors" href="#">
@@ -55,7 +55,7 @@ function PublicFooter() {
           </ul>
         </div>
         <div>
-          <h4 className="font-bold text-primary mb-3 text-sm">Contact</h4>
+          <h4 className="font-bold text-[11px] text-primary uppercase tracking-wider mb-3">Contact</h4>
           <ul className="space-y-1.5 text-body-sm text-on-surface-variant">
             <li>support@shaadihub.pk</li>
             <li>+92 21 3584 1029</li>
@@ -63,7 +63,7 @@ function PublicFooter() {
           </ul>
         </div>
       </div>
-      <div className="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop mt-6 pt-5 border-t border-outline-variant/30 text-center text-body-sm text-on-surface-variant/60">
+      <div className="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop mt-6 pt-5 border-t border-outline-variant text-center text-body-sm text-on-surface-variant">
         © 2026 ShaadiHub. All rights reserved.
       </div>
     </footer>

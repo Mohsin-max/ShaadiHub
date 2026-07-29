@@ -12,6 +12,7 @@ import BookingRequestModal from '../components/ui/BookingRequestModal'
 import PhoneNumberModal from '../components/ui/PhoneNumberModal'
 import VenueDetailSkeleton from '../components/ui/VenueDetailSkeleton'
 import { useAuth } from '../context/AuthContext'
+import useFavorites from '../hooks/useFavorites'
 import {
   getVenue,
   getBookedDates,
@@ -62,6 +63,8 @@ function VenueDetailPage() {
   const [myBookedRequest, setMyBookedRequest] = useState(null)
   const [togglingDate, setTogglingDate] = useState(null)
   const [blockError, setBlockError] = useState('')
+  const [linkCopied, setLinkCopied] = useState(false)
+  const { isFavorite, toggleFavorite } = useFavorites()
 
   useEffect(() => {
     setLoading(true)
@@ -116,6 +119,25 @@ function VenueDetailPage() {
 
   const handleBookingSuccess = (created) => {
     navigate(`/my-requests/${created.id}`)
+  }
+
+  const handleShare = async () => {
+    const url = window.location.href
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: venue?.name, url })
+      } catch {
+        // user cancelled the share sheet — no-op
+      }
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    } catch {
+      // clipboard unavailable — no-op
+    }
   }
 
   const handleToggleBlock = async (dateStr, isCurrentlyBlocked) => {
@@ -239,12 +261,24 @@ function VenueDetailPage() {
                     <Icon name="edit" className="text-[16px]" /> Edit Venue
                   </Link>
                 ) : (
-                  <button className="flex items-center gap-1.5 px-3.5 py-2 border border-outline-variant rounded-lg text-[13px] font-semibold bg-surface-container-lowest hover:border-antique-gold/50 hover:text-primary transition-colors">
-                    <Icon name="favorite" className="text-[16px]" /> Save
+                  <button
+                    onClick={() => toggleFavorite(venue.id)}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 border rounded-lg text-[13px] font-semibold transition-colors ${
+                      isFavorite(venue.id)
+                        ? 'bg-error text-white border-error'
+                        : 'border-outline-variant bg-surface-container-lowest hover:border-antique-gold/50 hover:text-primary'
+                    }`}
+                  >
+                    <Icon name="favorite" className="text-[16px]" />
+                    {isFavorite(venue.id) ? 'Saved' : 'Save'}
                   </button>
                 )}
-                <button className="flex items-center gap-1.5 px-3.5 py-2 border border-outline-variant rounded-lg text-[13px] font-semibold bg-surface-container-lowest hover:border-antique-gold/50 hover:text-primary transition-colors">
-                  <Icon name="share" className="text-[16px]" /> Share
+                <button
+                  onClick={handleShare}
+                  className="relative flex items-center gap-1.5 px-3.5 py-2 border border-outline-variant rounded-lg text-[13px] font-semibold bg-surface-container-lowest hover:border-antique-gold/50 hover:text-primary transition-colors"
+                >
+                  <Icon name={linkCopied ? 'check' : 'share'} className="text-[16px]" />
+                  {linkCopied ? 'Link Copied' : 'Share'}
                 </button>
               </div>
             </div>

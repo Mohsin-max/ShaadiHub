@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import Icon from './Icon'
+import useFavorites from '../../hooks/useFavorites'
 
 function formatPrice(value) {
   return `Rs. ${Number(value).toLocaleString('en-PK')}`
@@ -10,6 +11,8 @@ function VenueCard({ venue, showFavorite = true, editHref }) {
   const image = images?.[0]?.url
   const navigate = useNavigate()
   const detailHref = `/venues/${id}`
+  const { isFavorite, toggleFavorite } = useFavorites()
+  const favorited = isFavorite(id)
 
   return (
     <div
@@ -36,8 +39,16 @@ function VenueCard({ venue, showFavorite = true, editHref }) {
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/55 via-black/10 to-transparent pointer-events-none" />
         {showFavorite && (
           <button
-            onClick={(e) => e.stopPropagation()}
-            className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/80 backdrop-blur shadow-sm flex items-center justify-center text-on-surface-variant hover:text-error transition-all"
+            onClick={(e) => {
+              e.stopPropagation()
+              toggleFavorite(id)
+            }}
+            aria-label={favorited ? 'Remove from favorites' : 'Save to favorites'}
+            className={`absolute top-3 right-3 h-8 w-8 rounded-full backdrop-blur shadow-sm flex items-center justify-center transition-all active:scale-90 ${
+              favorited
+                ? 'bg-error text-white'
+                : 'bg-white/80 text-on-surface-variant hover:text-error'
+            }`}
           >
             <Icon name="favorite" className="text-[18px]" />
           </button>
@@ -71,12 +82,19 @@ function VenueCard({ venue, showFavorite = true, editHref }) {
             <p className="text-[12px] font-semibold text-on-surface">{type}</p>
           </div>
         </div>
-        <div>
-          <p className="text-[11px] text-on-surface-variant">Starting from</p>
-          <p className="text-[16px] font-bold text-primary">
-            {formatPrice(price)}
-            <span className="text-antique-gold">.</span>
-          </p>
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-[11px] text-on-surface-variant">Starting from</p>
+            <p className="text-[16px] font-bold text-primary">
+              {formatPrice(price)}
+              <span className="text-antique-gold">.</span>
+            </p>
+          </div>
+          {capacity > 0 && (
+            <p className="text-[10px] text-on-surface-variant italic">
+              ~{formatPrice(Math.round(price / capacity))}/guest
+            </p>
+          )}
         </div>
       </div>
     </div>

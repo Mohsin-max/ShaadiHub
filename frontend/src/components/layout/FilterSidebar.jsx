@@ -1,4 +1,5 @@
 import SearchableSelect from '../ui/SearchableSelect'
+import Icon from '../ui/Icon'
 
 function FilterSidebar({
   cities = [],
@@ -43,7 +44,8 @@ function FilterSidebar({
       <div className="space-y-6">
         {/* City */}
         <div>
-          <h3 className="font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+          <h3 className="flex items-center gap-1.5 font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+            <Icon name="location_city" className="text-[14px] text-antique-gold" />
             City
           </h3>
           {cities.length === 0 ? (
@@ -61,7 +63,8 @@ function FilterSidebar({
         {/* Neighborhood / Area — only once a city is chosen, scoped to that city */}
         {selectedCity && areas.length > 0 && (
           <div>
-            <h3 className="font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+            <h3 className="flex items-center gap-1.5 font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+              <Icon name="map" className="text-[14px] text-antique-gold" />
               Neighborhood
             </h3>
             <div className="grid grid-cols-2 gap-x-2 gap-y-2.5">
@@ -85,7 +88,8 @@ function FilterSidebar({
         {/* Venue Type */}
         {types.length > 0 && (
           <div>
-            <h3 className="font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+            <h3 className="flex items-center gap-1.5 font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+              <Icon name="celebration" className="text-[14px] text-antique-gold" />
               Venue Type
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -108,7 +112,8 @@ function FilterSidebar({
 
         {/* Capacity */}
         <div>
-          <h3 className="font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+          <h3 className="flex items-center gap-1.5 font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+            <Icon name="groups" className="text-[14px] text-antique-gold" />
             Capacity (Guests)
           </h3>
           <div className="space-y-3">
@@ -130,7 +135,8 @@ function FilterSidebar({
 
         {/* Budget */}
         <div>
-          <h3 className="font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+          <h3 className="flex items-center gap-1.5 font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+            <Icon name="payments" className="text-[14px] text-antique-gold" />
             Budget Range
           </h3>
           <div className="grid grid-cols-2 gap-2.5">
