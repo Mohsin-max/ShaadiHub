@@ -54,11 +54,12 @@ export function createVenue(formData, token) {
   return request('/venues', { method: 'POST', body: formData, headers: authHeaders(token) })
 }
 
-export function listVenues({ city = [], area = [], type = [] } = {}) {
+export function listVenues({ city = [], area = [], type = [], date = '' } = {}) {
   const params = new URLSearchParams()
   city.forEach((c) => params.append('city', c))
   area.forEach((a) => params.append('area', a))
   type.forEach((t) => params.append('type', t))
+  if (date) params.set('date', date)
   const query = params.toString()
   return request(`/venues${query ? `?${query}` : ''}`)
 }

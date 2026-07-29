@@ -162,7 +162,11 @@ public class VenuesController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> List([FromQuery] string[]? city, [FromQuery] string[]? area, [FromQuery] string[]? type)
+    public async Task<IActionResult> List(
+        [FromQuery] string[]? city,
+        [FromQuery] string[]? area,
+        [FromQuery] string[]? type,
+        [FromQuery] string? date)
     {
         var query = _context.Venues.Include(v => v.Owner).Include(v => v.Images)
             .Where(v => v.IsActive)
@@ -182,6 +186,16 @@ public class VenuesController : ControllerBase
         {
             var types = type.ToList();
             query = query.Where(v => types.Contains(v.Type));
+        }
+        if (!string.IsNullOrWhiteSpace(date) && DateOnly.TryParse(date, out var parsedDate))
+        {
+            var bookedVenueIds = _context.BookingRequests
+                .Where(b => b.EventDate == parsedDate && b.Status == BookingStatus.Booked)
+                .Select(b => b.VenueId);
+            var blockedVenueIds = _context.ManualBlockedDates
+                .Where(m => m.Date == parsedDate)
+                .Select(m => m.VenueId);
+            query = query.Where(v => !bookedVenueIds.Contains(v.Id) && !blockedVenueIds.Contains(v.Id));
         }
 
         var venues = await query.OrderByDescending(v => v.CreatedAt).ToListAsync();

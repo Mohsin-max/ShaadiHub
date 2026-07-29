@@ -11,12 +11,14 @@ function FilterSidebar({
   capacityMin = 0,
   budgetMin = '',
   budgetMax = '',
+  selectedDate = '',
   onCityChange,
   onAreaToggle,
   onTypeToggle,
   onCapacityChange,
   onBudgetMinChange,
   onBudgetMaxChange,
+  onDateChange,
   onClearAll,
 }) {
   const hasActiveFilters =
@@ -25,7 +27,8 @@ function FilterSidebar({
     selectedTypes.length > 0 ||
     capacityMin > 0 ||
     Boolean(budgetMin) ||
-    Boolean(budgetMax)
+    Boolean(budgetMax) ||
+    Boolean(selectedDate)
 
   return (
     <aside className="hidden md:block w-[282px] h-[calc(100vh-56px)] fixed left-0 top-14 bg-surface-container-lowest border-r border-outline-variant p-5 overflow-y-auto">
@@ -57,6 +60,39 @@ function FilterSidebar({
               onChange={onCityChange}
               placeholder="Select a city…"
             />
+          )}
+        </div>
+
+        {/* Event Date */}
+        <div>
+          <h3 className="flex items-center gap-1.5 font-label-caps text-[11px] text-on-surface uppercase tracking-wider mb-3">
+            <Icon name="event" className="text-[14px] text-antique-gold" />
+            Event Date
+          </h3>
+          <div className="relative">
+            <input
+              type="date"
+              min={new Date().toISOString().slice(0, 10)}
+              value={selectedDate}
+              onChange={(e) => onDateChange?.(e.target.value)}
+              className="w-full pl-3 pr-8 py-2 bg-white border border-outline-variant rounded-lg text-[12px] focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+            />
+            {selectedDate && (
+              <button
+                type="button"
+                onClick={() => onDateChange?.('')}
+                aria-label="Clear date"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-error transition-colors"
+              >
+                <Icon name="close" className="text-[14px]" />
+              </button>
+            )}
+          </div>
+          {selectedDate && (
+            <p className="text-[11px] text-on-surface-variant mt-1.5 flex items-center gap-1">
+              <Icon name="info" className="text-[13px]" />
+              Only showing venues open on this date.
+            </p>
           )}
         </div>
 

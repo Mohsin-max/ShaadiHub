@@ -40,6 +40,7 @@ function BrowseVenuesPage() {
   const capacityMin = Number(searchParams.get('capacity') || 0)
   const budgetMin = searchParams.get('budgetMin') || ''
   const budgetMax = searchParams.get('budgetMax') || ''
+  const selectedDate = searchParams.get('date') || ''
 
   const updateParams = (patch) => {
     setSearchParams(
@@ -62,11 +63,13 @@ function BrowseVenuesPage() {
   const setSearchText = (value) => updateParams({ q: value })
 
   useEffect(() => {
-    listVenues()
+    setLoading(true)
+    setError('')
+    listVenues({ date: selectedDate })
       .then(setVenues)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
-  }, [])
+  }, [selectedDate])
 
   const cities = useMemo(() => [...new Set(venues.map((v) => v.city))].sort(), [venues])
   const types = useMemo(() => [...new Set(venues.map((v) => v.type))].sort(), [venues])
@@ -135,12 +138,14 @@ function BrowseVenuesPage() {
           capacityMin={capacityMin}
           budgetMin={budgetMin}
           budgetMax={budgetMax}
+          selectedDate={selectedDate}
           onCityChange={handleCityChange}
           onAreaToggle={(area) => updateParams({ areas: toggleValue(selectedAreas, area) })}
           onTypeToggle={(type) => updateParams({ types: toggleValue(selectedTypes, type) })}
           onCapacityChange={(value) => updateParams({ capacity: value })}
           onBudgetMinChange={(value) => updateParams({ budgetMin: value })}
           onBudgetMaxChange={(value) => updateParams({ budgetMax: value })}
+          onDateChange={(value) => updateParams({ date: value })}
           onClearAll={clearAll}
         />
 
